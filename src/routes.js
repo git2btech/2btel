@@ -54,7 +54,7 @@ export default (isSigned = false) => createAppContainer(
                 activeTintColor: '#fff',
                 inactiveTintColor: 'rgba(255,255,255,0.6)',
                 style: {
-                    backgroundColor: '#d41132',
+                    backgroundColor: '#4dc998',
                 }
             }
         })
