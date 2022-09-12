@@ -29,27 +29,45 @@ export default function Cards({ data, onCancel, onNavigate }) {
     }
 
     function getTipo(type){
-        console.log(type);
         let tipo = '';
         switch(type){
-            case 1:
-                tipo = 'Maquina';
-            break;
-            case 2:
-                tipo = 'Depósito';
-            break;
-            case 3:
-                tipo = 'Expedição';
-            break;
-            case 4:
-                tipo = 'Recebimento';
-            break;
-            case 10:
-                tipo = 'Outros';
-            break;
+          case 1:
+            tipo = 'Maquina';
+          break;
+          case 2:
+              tipo = 'Depósito';
+          break;
+          case 3:
+              tipo = 'Expedição';
+          break;
+          case 4:
+              tipo = 'Recebimento';
+          break;
+          case 5:
+              tipo = 'Producao';
+          break;
+          case 6:
+              tipo = 'Qualidade';
+          break;
+          case 7:
+              tipo = 'Ordem de Servico';
+          break;
+          case 8:
+              tipo = 'Scrap';
+          break;
+          case 9:
+              tipo = 'Recon';
+          break;
+          case 10:
+              tipo = 'Outros';
+          break;
+          case 11:
+            tipo = 'Compras';
+          break;
         }
         return tipo;
     }
+    
   return (
     <Container onPress={onNavigate}>
         <Left>

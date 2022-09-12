@@ -21,19 +21,9 @@ export default function Apontamento({ navigation }) {
    const [dataProdutos, setDataProdutos] = useState([]);
    const [codigoChave, setCodigoChave]  = useState('');
    const [activeCamera, setActiveCamera] = useState(false);
+   const [scanOption, setScanOption] = useState('');
    const token = useSelector(state=> state.auth.token);
    api.defaults.headers.Authorization = `Bearer ${token}`;
-
-   useEffect(()=>{
-      switch(apontamentoData.tipo){
-        case 3:
-          getProduto('EXP001');
-        break;
-        case 4:
-          getProduto('REC001');
-        break;
-      }
-   },[])
 
    async function getProduto(text){
     console.log(text);
@@ -79,6 +69,39 @@ export default function Apontamento({ navigation }) {
       }
   }
 
+  function initScan(type){
+    setScanOption(type);
+    setActiveCamera(true);
+  }
+
+  function getScanData(barcodesData){
+    console.log('scanOption',scanOption);
+    if(scanOption === 'chave'){
+      setCodigoChave(barcodesData);
+      setActiveCamera(false);
+    }else{
+      const data = JSON.parse(barcodesData)
+      console.log('Entrou aqui: ', data)
+      setCodigoProduto(data.codigoProduto);
+      setProdutoId(data.produtoId);
+      setNomeProduto(`${data.codigoProduto} - ${data.nomeProduto}`);
+      setQuantidade(data.quantidade);
+      setActiveCamera(false);
+    }
+    
+  }
+
+  useEffect(()=>{
+    switch(apontamentoData.tipo){
+      case 3:
+        getProduto('EXP001');
+      break;
+      case 4:
+        getProduto('REC001');
+      break;
+    }
+ },[])
+
   return (
     <Background>
       <Container>
@@ -88,7 +111,7 @@ export default function Apontamento({ navigation }) {
           <Form>
             <ScrollView>
             <Intro>Adicionar Item</Intro>
-
+            {scanOption !== 'produto' && 
               <AutocompleteDropdown
                       clearOnFocus={false}
                       closeOnBlur={false}
@@ -113,6 +136,17 @@ export default function Apontamento({ navigation }) {
                         }
                       }}
                 />
+              }
+              {scanOption === 'produto' && 
+                  <FormInput
+                    icon={'filter-1'}
+                    keyboardCorrect={false}
+                    autoCapitalize="none"
+                    placeholder="Quantidade"
+                    value={nomeProduto}
+                    editable={false}
+                  />
+              }
               <FormInput
                 icon={'filter-1'}
                 keyboardCorrect={false}
@@ -125,11 +159,11 @@ export default function Apontamento({ navigation }) {
                 <FormInput
                     keyboardCorrect={false}
                     autoCapitalize="none"
-                    placeholder="Chave (Clique no ícone para escanear)"
+                    placeholder="Chave (use o ícone para escanear)"
                     value={codigoChave}
                     onChangeText={setCodigoChave}
                   />
-                <IconTouch name={'camera'} size={30} onPress={()=>setActiveCamera(true)}/>
+                <IconTouch name={'camera'} size={30} onPress={()=>initScan('chave')}/>
               </>
               {apontamentoData.tipo == 1 &&
                   <FormInput
@@ -143,6 +177,9 @@ export default function Apontamento({ navigation }) {
               }
               <SubmitButton onPress={handleSubmit}>
                 Adicionar
+              </SubmitButton>
+              <SubmitButton onPress={()=>initScan('produto')}>
+                Adicionar por QrCode
               </SubmitButton>
               <SubmitButton onPress={()=>navigation.navigate("Apontamentos")}>
                 Voltar
@@ -168,8 +205,7 @@ export default function Apontamento({ navigation }) {
               }}
               onBarCodeRead={(barcodes) => {
                 if(barcodes.data !== null && barcodes.data !== undefined){
-                    setCodigoChave(barcodes.data);
-                    setActiveCamera(false);
+                    getScanData(barcodes.data)
                  }
                 }
               }

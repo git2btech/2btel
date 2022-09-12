@@ -52,6 +52,6 @@ export const IconTouch = styled(Icon)`
     color: rgba(255,255,255,0.6);
     position: relative;
     bottom: 48px;
-    right: -315px;
+    right: -310px;
     margin-bottom: -30px
 `;

@@ -14,6 +14,7 @@ export default function Apontamento({ navigation }) {
   const [inventario, setInventario] = useState([]);
 
   console.log('Dados do apontamento: ', apontamentoData);
+ 
   function getTipo(type){
     let tipo = '';
     switch(type){
@@ -29,8 +30,26 @@ export default function Apontamento({ navigation }) {
       case 4:
           tipo = 'Recebimento';
       break;
+      case 5:
+          tipo = 'Producao';
+      break;
+      case 6:
+          tipo = 'Qualidade';
+      break;
+      case 7:
+          tipo = 'OrdemServico';
+      break;
+      case 8:
+          tipo = 'Scrap';
+      break;
+      case 9:
+          tipo = 'Recon';
+      break;
       case 10:
           tipo = 'Outros';
+      break;
+      case 11:
+        tipo = 'Compras';
       break;
     }
     return tipo;
@@ -44,6 +63,8 @@ export default function Apontamento({ navigation }) {
     let inventario_lista = [];
     api.defaults.headers.Authorization = `Bearer ${token}`;
     const response = await api.get('/api/v1/inventario/'+apontamentoData.id);
+    
+    console.log('Veio isso: ', response.data);
     if(response.data.Items.length > 0){
       for (let i = 0; i < response.data.Items.length; i++){
         inventario_lista.push({
