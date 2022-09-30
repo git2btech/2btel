@@ -22,6 +22,7 @@ export default function Apontamento({ navigation }) {
    const [codigoChave, setCodigoChave]  = useState('');
    const [activeCamera, setActiveCamera] = useState(false);
    const [scanOption, setScanOption] = useState('');
+   const [hasOcOption, setHasOcOption] = useState(false);
    const token = useSelector(state=> state.auth.token);
    api.defaults.headers.Authorization = `Bearer ${token}`;
 
@@ -48,6 +49,13 @@ export default function Apontamento({ navigation }) {
     setCodigoProduto(produtoFiltered[0].Codigo);
     setProdutoId(item.id);
     setNomeProduto(item.title);
+  }
+
+  function setChaveField(item){
+    const chaveFiltered = dataProdutos.filter(function (el) {
+      return el.Id == item.id;
+    });
+    setCodigoChave(item.title);
   }
 
 
@@ -102,6 +110,14 @@ export default function Apontamento({ navigation }) {
     }
  },[])
 
+ useEffect(()=>{
+  if(nomeProduto.includes("OC")){
+    setHasOcOption(true);
+  }
+},[nomeProduto])
+
+ 
+
   return (
     <Background>
       <Container>
@@ -155,16 +171,44 @@ export default function Apontamento({ navigation }) {
                 value={quantidade}
                 onChangeText={setQuantidade}
               />
-              <>
-                <FormInput
-                    keyboardCorrect={false}
-                    autoCapitalize="none"
-                    placeholder="Chave (use o ícone para escanear)"
-                    value={codigoChave}
-                    onChangeText={setCodigoChave}
-                  />
-                <IconTouch name={'camera'} size={30} onPress={()=>initScan('chave')}/>
-              </>
+              {scanOption !== 'produto' && !hasOcOption ? (
+                  <>
+                  <FormInput
+                      keyboardCorrect={false}
+                      autoCapitalize="none"
+                      placeholder="Chave (use o ícone para escanear)"
+                      value={codigoChave}
+                      onChangeText={setCodigoChave}
+                    />
+                  <IconTouch name={'camera'} size={30} onPress={()=>initScan('chave')}/>
+                  </>
+                ) : (
+                  <AutocompleteDropdown
+                      clearOnFocus={false}
+                      closeOnBlur={false}
+                      closeOnSubmit={false}
+                      onSelectItem={(item) => {
+                        item && setChaveField(item)
+                      }}
+                      onChangeText={getProduto}
+                      dataSet={dataProduto}
+                      debounce={600}
+                      loading={loading}
+                      useFilter={false}
+                      textInputProps={{
+                        placeholder: "Digite o código chave",
+                        autoCorrect: false,
+                        autoCapitalize: "none",
+                        style: {
+                          backgroundColor: "rgba(0,0,0,0.1)",
+                          color: "#fff",
+                          paddingLeft: 18,
+                          marginBottom: 10,
+                        }
+                      }}
+                   />
+                )
+              }
               {apontamentoData.tipo == 1 &&
                   <FormInput
                     icon={'filter-1'}
