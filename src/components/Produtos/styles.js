@@ -2,7 +2,7 @@ import styled from 'styled-components/native';
 
 export const Container = styled.View`
     margin-bottom:15px;
-    width: 345px;
+    width: 100%;
     padding:20px;
     border-radius: 4px;
     background: #fff;
@@ -26,7 +26,7 @@ export const Bandeira = styled.Image`
 
 export const Info = styled.View`
     margin-left: 15px;
-
+    max-width: 90%;
 `;
 
 export const Nome = styled.Text`

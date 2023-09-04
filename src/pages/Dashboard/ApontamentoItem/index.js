@@ -72,6 +72,11 @@ export default function Apontamento({ navigation }) {
           CodigoChave: codigoChave,
         });
         if(!response.data) navigation.navigate("Apontamento",{apontamento: apontamentoData});
+        Alert.alert(
+          'Apontamento Cadastrado', 
+          'Seu apontamento foi criado com sucesso clique em ok para ser redirecionado para lista de apontamentos', [
+          {text: 'OK', onPress: () => navigation.navigate("Apontamento",{apontamento: apontamentoData})},
+        ]);
       }catch(error){
         console.log(error);
       }
@@ -125,7 +130,6 @@ export default function Apontamento({ navigation }) {
         <>
         {!activeCamera &&
           <Form>
-            <ScrollView>
             <Intro>Adicionar Item</Intro>
             {scanOption !== 'produto' && 
               <AutocompleteDropdown
@@ -228,7 +232,6 @@ export default function Apontamento({ navigation }) {
               <SubmitButton onPress={()=>navigation.navigate("Apontamentos")}>
                 Voltar
               </SubmitButton>
-            </ScrollView>
           </Form>
         }
 

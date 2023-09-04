@@ -88,7 +88,7 @@ export default function Apontamento({ navigation }) {
             <ContentText>Tipo: {getTipo(apontamentoData.tipo)}</ContentText>
             <ContentText>Data: {apontamentoData.data}</ContentText>
             <ContentTitle>Itens Cadastrados</ContentTitle>
-            <ScrollView style={{height: 300}}>
+            <ScrollView style={{height: 200}}>
               <List
                 data={inventario}
                 keyExtractor={item=>String(item.id)}

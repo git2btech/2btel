@@ -2,7 +2,8 @@ import { Platform } from 'react-native';
 import styled from 'styled-components/native';
 import Input from '../../../components/Input';
 import Button from '../../../components/Button';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import Icon from 'react-native-vector-icons/MaterialIcons'; 
+
 
 export const Container = styled.KeyboardAvoidingView.attrs({
     enabled: Platform.OS == 'ios',
@@ -25,7 +26,6 @@ export const FormInput = styled(Input)`
 
 export const SubmitButton = styled(Button)`
     margin-top:5px;
-    width: 375px;
 `;
 
 export const SignLink = styled.TouchableOpacity`
@@ -50,8 +50,7 @@ export const Intro = styled.Text`
 
 export const IconTouch = styled(Icon)`
     color: rgba(255,255,255,0.6);
-    position: relative;
-    bottom: 48px;
-    right: -310px;
-    margin-bottom: -30px
+    position: absolute;
+    bottom: 170px;
+    right: 10px;
 `;

@@ -37,7 +37,7 @@ export default function Apontamentos({ navigation }) {
           <Image source={logo} style={{alignSelf: 'center'}}/>
           <Form>
             <Title>Apontamentos Cadastrados</Title>
-            <ScrollView style={{height: 300}}>
+            <ScrollView style={{height: 200}}>
                   <List
                     data={listApontamentos}
                     keyExtractor={item=>String(item.id)}
