@@ -24,6 +24,7 @@ export const Bandeira = styled.Image`
 `;
 
 export const Info = styled.View`
+    width: 65%;
     margin-left: 15px;
 
 `;

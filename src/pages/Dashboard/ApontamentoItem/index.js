@@ -6,7 +6,7 @@ import logo from '../../../assets/img/logo-2btech.png';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
 import { RNCamera } from 'react-native-camera';
 import api from '../../../services/api';
-import { Container, Form, FormInput, SubmitButton,Intro,IconTouch } from './styles';
+import { Container, Form, FormInput, SubmitButton,Intro,IconTouch, Title } from './styles';
 
 export default function Apontamento({ navigation }) {
    const cameraRef = useRef();
@@ -23,6 +23,8 @@ export default function Apontamento({ navigation }) {
    const [activeCamera, setActiveCamera] = useState(false);
    const [scanOption, setScanOption] = useState('');
    const [hasOcOption, setHasOcOption] = useState(false);
+   const [eanEnabled, setEanEnabled] = useState(false);
+   const [dataEan, setDataEan] = useState({});
    const token = useSelector(state=> state.auth.token);
    api.defaults.headers.Authorization = `Bearer ${token}`;
 
@@ -33,12 +35,38 @@ export default function Apontamento({ navigation }) {
       setLoading(true);
       api.defaults.headers.Authorization = `Bearer ${token}`;
       const response = await api.get('/api/v1/produto?q='+text.toUpperCase());
+      console.log('Veio isso: ',response.data.List);
       setDataProdutos(response.data.List);
       for (let i = 0; i < response.data.List.length; i++ ){
-        matriculas_lista.push({id: response.data.List[i].Id, title: response.data.List[i].Codigo+" - "+response.data.List[i].Descricao});
+        if(response.data.List[i].DescricaoSubCategoria !== "FAMILIA"){
+          matriculas_lista.push({
+            id: response.data.List[i].Id, 
+            title: response.data.List[i].Codigo+" - "+response.data.List[i].Descricao,
+          });
+        }
       }
       setDataProduto(matriculas_lista);
       setLoading(false);
+    }
+  }
+
+  async function getProdutoByEan(text){
+    if(text.length >= 3){
+      console.log('Veio isso: ', text);
+      api.defaults.headers.Authorization = `Bearer ${token}`;
+      const response = await api.get('/api/v1/produto?q='+text.toUpperCase());
+      console.log('Veio isso: ', response.data.List);
+      for (let i = 0; i < response.data.List.length; i++ ){
+       setDataEan({
+          id: response.data.List[i].Id, 
+          title: response.data.List[i].Codigo+" - "+response.data.List[i].Descricao,
+        });
+        setCodigoProduto(response.data.List[i].Codigo);
+        setProdutoId(response.data.List[i].Id);
+        setNomeProduto(response.data.List[i].Codigo+" - "+response.data.List[i].Descricao);
+      }
+      setEanEnabled(true);
+      setActiveCamera(false);
     }
   }
 
@@ -90,8 +118,7 @@ export default function Apontamento({ navigation }) {
   function getScanData(barcodesData){
     console.log('scanOption',scanOption);
     if(scanOption === 'chave'){
-      setCodigoChave(barcodesData);
-      setActiveCamera(false);
+      getProdutoByEan(barcodesData);
     }else{
       const data = JSON.parse(barcodesData)
       console.log('Entrou aqui: ', data)
@@ -131,7 +158,10 @@ export default function Apontamento({ navigation }) {
         {!activeCamera &&
           <Form>
             <Intro>Adicionar Item</Intro>
-            {scanOption !== 'produto' && 
+            {eanEnabled &&
+              <Title>Produto: {dataEan?.title}</Title>
+            }
+            {scanOption !== 'produto' && !eanEnabled &&
               <AutocompleteDropdown
                       clearOnFocus={false}
                       closeOnBlur={false}

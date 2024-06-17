@@ -26,7 +26,7 @@ export const Bandeira = styled.Image`
 
 export const Info = styled.View`
     margin-left: 15px;
-    max-width: 90%;
+    max-width: 65%;
 `;
 
 export const Nome = styled.Text`

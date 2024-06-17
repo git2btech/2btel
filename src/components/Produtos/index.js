@@ -4,10 +4,9 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import prodIcon from '../../assets/img/snack-default.png';
 import { Container, Left, Bandeira, Info, Nome, Numero, Expires, Action } from './styles';
 
-export default function Produtos({ data, onCancel }) {
-
+export default function Produtos({ data, userData, onCancel }) {
   return (
-    <Container onStartShouldSetResponder={onCancel}>
+    <Container>
         <Left>
             <Bandeira source={prodIcon}></Bandeira>
             <Info>
@@ -19,6 +18,10 @@ export default function Produtos({ data, onCancel }) {
                 }
             </Info>
         </Left>
+        
+        <TouchableOpacity onPress={onCancel}>
+            <Icon name="delete" size={20} color="#f64c75"/>
+        </TouchableOpacity>
     </Container>
   );
 }

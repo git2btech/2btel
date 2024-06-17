@@ -23,8 +23,8 @@ export function* signIn({ payload }) {
 
     const user = {
       name: response.data.userName,
-      empresaId: response.data.empresaId,
-      filial: response.data.filial,
+      empresaId: response.data.EntidadeId,
+      filial: response.data.Dominio,
       password: password,
       datelog: new Date()
     };

@@ -3,7 +3,7 @@ import { TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Container, Left, Bandeira, Info, Nome, Numero, Expires } from './styles';
 
-export default function Cards({ data, onCancel, onNavigate }) {
+export default function Cards({ userData, data, onCancel, onNavigate }) {
     let bandeira = '';
     function getBandeira(type){
         switch(type){
@@ -78,10 +78,11 @@ export default function Cards({ data, onCancel, onNavigate }) {
                 <Expires>Data do registro: {data.data}</Expires>
             </Info>
         </Left>
-
-        {/* <TouchableOpacity onPress={onCancel}>
-            <Icon name="delete" size={20} color="#f64c75"/>
-        </TouchableOpacity> */}
+        {userData?.name === data.login &&
+            <TouchableOpacity onPress={onCancel}>
+                <Icon name="delete" size={20} color="#f64c75"/>
+            </TouchableOpacity>
+        }
     </Container>
   );
 }

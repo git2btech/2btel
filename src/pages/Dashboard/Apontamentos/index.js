@@ -1,5 +1,5 @@
 import React, { useEffect,useState } from 'react';
-import { Image,ScrollView,SafeAreaView } from 'react-native';
+import { Image,ScrollView,SafeAreaView, Alert } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import Background from '../../../components/Background';
 import logo from '../../../assets/img/logo-2btech.png';
@@ -9,6 +9,7 @@ import { Container, Form, SubmitButton,Title,List } from './styles';
 
 export default function Apontamentos({ navigation }) {
   const token = useSelector(state=> state.auth.token);
+  const user = useSelector(state => state.user.profile);
   const [listApontamentos,setListApontamentos] = useState([]);
 
   useEffect(()=>{
@@ -30,6 +31,33 @@ export default function Apontamentos({ navigation }) {
     }
     setListApontamentos(inventario_lista);
   }
+
+  async function confirmDelete(id){
+    Alert.alert(
+      'Aviso!',
+      'Você deseja deletar esse apontamento?',
+      [
+        {
+          text: 'Cancelar',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {text: 'OK', onPress: () => handleDelet(id)},
+      ],
+      {cancelable: false},
+    );
+  }
+
+  async function handleDelet(id){
+    console.log('ID do apontamento: ', id);
+    api.defaults.headers.Authorization = `Bearer ${token}`;
+    const response = await api.delete(`api/v1/inventario/${id}`);
+    console.log(response.data);
+
+    setListApontamentos(
+      listApontamentos.filter(apontamento =>apontamento.id !== id)
+    );
+  }
   
   return (
     <Background>
@@ -41,7 +69,7 @@ export default function Apontamentos({ navigation }) {
                   <List
                     data={listApontamentos}
                     keyExtractor={item=>String(item.id)}
-                    renderItem={({ item }) => <Cards  onNavigate={()=>navigation.navigate("Apontamento",{apontamento: item})} onCancel={()=> confirmDelete(item.id)} data={item}/> }
+                    renderItem={({ item }) => <Cards  onNavigate={()=>navigation.navigate("Apontamento",{apontamento: item})} onCancel={()=> confirmDelete(item.id)} data={item} userData={user}/> }
                   />
             </ScrollView>
             <SubmitButton onPress={()=> navigation.navigate('Inicial')}>

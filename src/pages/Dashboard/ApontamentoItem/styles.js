@@ -48,6 +48,15 @@ export const Intro = styled.Text`
     margin-bottom: 30px;
 `;
 
+export const Title = styled.Text`
+    font-size: 18px;
+    color: #fff;
+    font-weight: 600;
+    text-align: left;
+    margin-top: 30px; 
+    margin-bottom: 30px;
+`;
+
 export const IconTouch = styled(Icon)`
     color: rgba(255,255,255,0.6);
     position: absolute;

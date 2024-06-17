@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Image,ScrollView,Text } from 'react-native';
+import { Image,ScrollView,Alert } from 'react-native';
 import Background from '../../../components/Background';
 import logo from '../../../assets/img/logo-2btech.png';
 import api from '../../../services/api';
@@ -11,9 +11,8 @@ import {} from '../ApontamentoItem/styles';
 export default function Apontamento({ navigation }) {
   const apontamentoData = navigation.getParam('apontamento');
   const token = useSelector(state=> state.auth.token);
+  const user = useSelector(state => state.user.profile);
   const [inventario, setInventario] = useState([]);
-
-  console.log('Dados do apontamento: ', apontamentoData);
  
   function getTipo(type){
     let tipo = '';
@@ -62,21 +61,49 @@ export default function Apontamento({ navigation }) {
   async function getItens(){
     let inventario_lista = [];
     api.defaults.headers.Authorization = `Bearer ${token}`;
-    const response = await api.get('/api/v1/inventario/'+apontamentoData.id);
+    console.log('Id do apontamento: ', apontamentoData.id)
+    const response = await api.get('/api/v1/inventario/'+apontamentoData.id+'/item');
     
     console.log('Veio isso: ', response.data);
-    if(response.data.Items.length > 0){
-      for (let i = 0; i < response.data.Items.length; i++){
+    if(response.data.List.length > 0){
+      for (let i = 0; i < response.data.List.length; i++){
         inventario_lista.push({
-          id: response.data.Items[i].Id,
-          codigoProduto: response.data.Items[i].CodigoProduto,
-          numeroSelecao: response.data.Items[i].NumeroSelecao,
-          nomeProduto: response.data.Items[i].NomeProduto,
-          quantidade: response.data.Items[i].Quantidade,
+          id: response.data.List[i].Id,
+          codigoProduto: response.data.List[i].CodigoProduto,
+          numeroSelecao: response.data.List[i].NumeroSelecao,
+          nomeProduto: response.data.List[i].NomeProduto,
+          quantidade: response.data.List[i].Quantidade,
+          loginRegistro: response.data.LoginRegistro,
         });
       }
+      inventario_lista.sort((a,b) => b.id - a.id);
     }
     setInventario(inventario_lista);
+  }
+
+  async function confirmDelete(id){
+    Alert.alert(
+      'Aviso!',
+      'Você deseja deletar esse apontamento?',
+      [
+        {
+          text: 'Cancelar',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {text: 'OK', onPress: () => handleDelet(id)},
+      ],
+      {cancelable: false},
+    );
+  }
+
+  async function handleDelet(id){
+    setInventario(
+      inventario.filter(inventario =>inventario.id !== id)
+    );
+    api.defaults.headers.Authorization = `Bearer ${token}`;
+    const response = await api.delete(`api/v1/inventario/${apontamentoData.id}/item/${id}`);
+    console.log(response.data);
   }
 
   return (
@@ -92,7 +119,8 @@ export default function Apontamento({ navigation }) {
               <List
                 data={inventario}
                 keyExtractor={item=>String(item.id)}
-                renderItem={({ item }) => <Produtos onCancel={()=> null} data={item}/> }
+                //renderItem={({ item }) => <Produtos onCancel={()=> null} data={item} userData={user}/> }
+                renderItem={({ item }) => <Produtos onCancel={()=> confirmDelete(item.id)} data={item} userData={user}/> }
               />
             </ScrollView>
             <SubmitButton onPress={()=>navigation.navigate("ApontamentoItem",{apontamentoData:apontamentoData})}>
