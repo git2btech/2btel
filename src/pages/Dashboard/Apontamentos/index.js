@@ -19,7 +19,7 @@ export default function Apontamentos({ navigation }) {
   async function getInventarios(){
     let inventario_lista = [];
     api.defaults.headers.Authorization = `Bearer ${token}`;
-    const response = await api.get('/api/v1/inventario');
+    const response = await api.get(`/api/v1/inventario?ps=50&page=1`);
     for (let i = 0; i < response.data.List.length; i++){
       inventario_lista.push({
         id: response.data.List[i].Id, 

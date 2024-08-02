@@ -62,7 +62,7 @@ export default function Apontamento({ navigation }) {
     let inventario_lista = [];
     api.defaults.headers.Authorization = `Bearer ${token}`;
     console.log('Id do apontamento: ', apontamentoData.id)
-    const response = await api.get('/api/v1/inventario/'+apontamentoData.id+'/item');
+    const response = await api.get('/api/v1/inventario/'+apontamentoData.id+'/item?ps=50&page=1');
     
     console.log('Veio isso: ', response.data);
     if(response.data.List.length > 0){
