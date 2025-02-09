@@ -5,7 +5,7 @@ import { RNCamera } from 'react-native-camera';
 import Background from '../../../components/Background';
 import logo from '../../../assets/img/logo-2btech.png';
 import { Container,SubmitButton,DefaultText } from './styles';
-import useLocation from '../../../hooks/useLocation';
+// import useLocation from '../../../hooks/useLocation';
 import api from '../../../services/api';
 import moment from "moment";
 import 'moment/locale/pt-br';

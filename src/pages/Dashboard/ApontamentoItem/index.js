@@ -1,12 +1,12 @@
 import React, { useState,useEffect,useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { Image,ScrollView,Alert } from 'react-native';
+import { Image,Alert } from 'react-native';
 import Background from '../../../components/Background';
 import logo from '../../../assets/img/logo-2btech.png';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
 import { RNCamera } from 'react-native-camera';
 import api from '../../../services/api';
-import { Container, Form, FormInput, SubmitButton,Intro,IconTouch, Title } from './styles';
+import { Container, Form, FormInput, SubmitButton,Intro,IconTouch, Title, BackButton } from './styles';
 
 export default function Apontamento({ navigation }) {
    const cameraRef = useRef();
@@ -34,14 +34,14 @@ export default function Apontamento({ navigation }) {
     if(text.length >= 3){
       setLoading(true);
       api.defaults.headers.Authorization = `Bearer ${token}`;
-      const response = await api.get('/api/v1/produto?q='+text.toUpperCase());
-      console.log('Veio isso: ',response.data.List);
-      setDataProdutos(response.data.List);
-      for (let i = 0; i < response.data.List.length; i++ ){
-        if(response.data.List[i].DescricaoSubCategoria !== "FAMILIA"){
+      const response = await api.get('/v1/produto?search='+text.toUpperCase());
+      console.log('Veio isso: ',response.data.list);
+      setDataProdutos(response.data.list);
+      for (let i = 0; i < response.data.list.length; i++ ){
+        if(response.data.list[i].DescricaoSubCategoria !== "FAMILIA"){
           matriculas_lista.push({
-            id: response.data.List[i].Id, 
-            title: response.data.List[i].Codigo+" - "+response.data.List[i].Descricao,
+            id: response.data.list[i].id, 
+            title: response.data.list[i].codigo+" - "+response.data.list[i].descricao,
           });
         }
       }
@@ -54,16 +54,16 @@ export default function Apontamento({ navigation }) {
     if(text.length >= 3){
       console.log('Veio isso: ', text);
       api.defaults.headers.Authorization = `Bearer ${token}`;
-      const response = await api.get('/api/v1/produto?q='+text.toUpperCase());
-      console.log('Veio isso: ', response.data.List);
-      for (let i = 0; i < response.data.List.length; i++ ){
+      const response = await api.get('/v1/produto?search='+text.toUpperCase());
+      console.log('Veio isso: ', response.data.list);
+      for (let i = 0; i < response.data.list.length; i++ ){
        setDataEan({
-          id: response.data.List[i].Id, 
-          title: response.data.List[i].Codigo+" - "+response.data.List[i].Descricao,
+          id: response.data.list[i].id, 
+          title: response.data.list[i].codigo+" - "+response.data.list[i].descricao,
         });
-        setCodigoProduto(response.data.List[i].Codigo);
-        setProdutoId(response.data.List[i].Id);
-        setNomeProduto(response.data.List[i].Codigo+" - "+response.data.List[i].Descricao);
+        setCodigoProduto(response.data.list[i].codigo);
+        setProdutoId(response.data.list[i].id);
+        setNomeProduto(response.data.list[i].codigo+" - "+response.data.list[i].descricao);
       }
       setEanEnabled(true);
       setActiveCamera(false);
@@ -72,16 +72,16 @@ export default function Apontamento({ navigation }) {
 
   function setDataProdutoField(item){
     const produtoFiltered = dataProdutos.filter(function (el) {
-      return el.Id == item.id;
+      return el.id == item.id;
     });
-    setCodigoProduto(produtoFiltered[0].Codigo);
+    setCodigoProduto(produtoFiltered[0].codigo);
     setProdutoId(item.id);
     setNomeProduto(item.title);
   }
 
   function setChaveField(item){
     const chaveFiltered = dataProdutos.filter(function (el) {
-      return el.Id == item.id;
+      return el.id == item.id;
     });
     setCodigoChave(item.title);
   }
@@ -90,14 +90,14 @@ export default function Apontamento({ navigation }) {
     async function handleSubmit(){
       try {
         api.defaults.headers.Authorization = `Bearer ${token}`;
-        const response = await api.post('/api/v1/inventario/'+apontamentoData.id+'/item', {
-          inventarioId: apontamentoData.id,
+        const response = await api.post('/v1/inventario/'+apontamentoData.id+'/item', {
+          apontamentoId: apontamentoData.id,
           produtoId,
           codigoProduto,
           nomeProduto,
           quantidade,
           numeroSelecao,
-          CodigoChave: codigoChave,
+          codigoChave,
         });
         if(!response.data) navigation.navigate("Apontamento",{apontamento: apontamentoData});
         Alert.alert(
@@ -287,9 +287,9 @@ export default function Apontamento({ navigation }) {
                 }
               }
             />
-            <SubmitButton onPress={()=>setActiveCamera(false)}>
+            <BackButton onPress={()=>setActiveCamera(false)}>
               Voltar
-            </SubmitButton>
+            </BackButton>
           </>
         }
       </>

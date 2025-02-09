@@ -4,27 +4,29 @@ import api from '../../../services/api';
 import { signInSuccess, signFailure,signUpSuccess } from './actions';
 
 export function* signIn({ payload }) {
-  console.log('Payload: ',payload);
   try {
-    const { email, password, filial } = payload;
+    const { email, password } = payload;
+
+    let data = JSON.stringify({
+      "userName": email,
+      "password": password
+    });
+
+    console.log(data);
     
-    const params = new URLSearchParams();
-    params.append('grant_type', 'password');
-    params.append('username', email);
-    params.append('password', password);
-    params.append('filial', filial);
-    const response = yield call(api.post, '/Token', params);
+    const response = yield call(api.post, '/v1/auth/entrar', data, {
+      headers: {
+        "Content-Type": 'application/json'
+      }
+    });
 
     console.log(response.data);
 
-    const token = response.data.access_token;
-
-    api.defaults.headers.Authorization = `Bearer ${token}`;
+    const token = response.data.accessToken;
 
     const user = {
       name: response.data.userName,
       empresaId: response.data.EntidadeId,
-      filial: response.data.Dominio,
       password: password,
       datelog: new Date()
     };
@@ -39,7 +41,6 @@ export function* signIn({ payload }) {
 
     yield put(signInSuccess(token, user));
 
-    //history.push('/dashboard');
   } catch (err) {
     Alert.alert(
       'Falha na autenticação',
@@ -50,27 +51,25 @@ export function* signIn({ payload }) {
 }
 
 export function* refreshlogin({ payload }) {
-  console.log('Payload: ',payload);
   try {
-    const { email, password, filial } = payload;
+    const { email, password } = payload;
+
+    let data = JSON.stringify({
+      "userName": email,
+      "password": password
+    });
     
-    const params = new URLSearchParams();
-    params.append('grant_type', 'password');
-    params.append('username', email);
-    params.append('password', password);
-    params.append('filial', filial);
-    const response = yield call(api.post, '/Token', params);
+    const response = yield call(api.post, '/v1/auth/entrar', data, {
+      headers: {
+        "Content-Type": 'application/json'
+      }
+    });
 
-    console.log(response.data);
-
-    const token = response.data.access_token;
-
-    api.defaults.headers.Authorization = `Bearer ${token}`;
+    const token = response.data.accessToken;
 
     const user = {
       name: response.data.userName,
       empresaId: response.data.empresaId,
-      filial: response.data.filial,
       password: password,
       datelog: new Date()
     };
@@ -109,8 +108,6 @@ export function* signUp({ payload }) {
     Alert.alert('Cadastro de Usuário', 'Cadastradado com sucesso!');
     yield put(signUpSuccess());
   } catch (err) {
-    console.log(err.response);
-    console.log('erro no cadastro', err);
     Alert.alert('Falha no cadastro', err.response.data.errors[0]);
     yield put(signFailure());
   }

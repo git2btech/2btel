@@ -39,4 +39,18 @@ export const ContentTitle = styled.Text`
 export const List = styled.FlatList.attrs({
     showsVerticalScrollIndicator: false,
     contentContainerStyle:{ padding: 0 }
-})``;
+})`
+    height: 200px;
+`;
+
+export const ItemCard = styled.View`
+    margin-bottom:15px;
+    width: 100%;
+    padding:20px;
+    border-radius: 4px;
+    background: #fff;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+`;

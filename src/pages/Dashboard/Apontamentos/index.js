@@ -1,10 +1,12 @@
 import React, { useEffect,useState } from 'react';
-import { Image,ScrollView,SafeAreaView, Alert } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import { Image, Alert } from 'react-native';
+import { useSelector } from 'react-redux';
 import Background from '../../../components/Background';
 import logo from '../../../assets/img/logo-2btech.png';
 import Cards from '../../../components/Cards';
 import api from '../../../services/api';
+import Moment from 'moment';
+import 'moment/locale/pt-br';
 import { Container, Form, SubmitButton,Title,List } from './styles';
 
 export default function Apontamentos({ navigation }) {
@@ -16,20 +18,35 @@ export default function Apontamentos({ navigation }) {
     getInventarios();
   },[]);
 
+  // Data de hoje
+  const dataHoje = Moment().format('YYYY-MM-DDTHH:mm:ss');
+
+  // Data de 30 dias atrás
+  const data30DiasAtras = Moment().subtract(30, 'days').format('YYYY-MM-DDTHH:mm:ss');
+
   async function getInventarios(){
-    let inventario_lista = [];
-    api.defaults.headers.Authorization = `Bearer ${token}`;
-    const response = await api.get(`/api/v1/inventario?ps=50&page=1`);
-    for (let i = 0; i < response.data.List.length; i++){
-      inventario_lista.push({
-        id: response.data.List[i].Id, 
-        data: response.data.List[i].DataInventario,
-        login: response.data.List[i].LoginRegistro, 
-        tipo: response.data.List[i].Tipo,
-        matricula: response.data.List[i].Matricula,
+    try{
+      let inventario_lista = [];
+      const response = await api.get(`/v1/inventario?pageSize=50&page=1&dataInicial=${data30DiasAtras}&dataFinal=${dataHoje}`,{
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
       });
+      if(response && response.data.list.length > 0){
+        for (let i = 0; i < response.data.list.length; i++){
+          inventario_lista.push({
+            id: response.data.list[i].id,
+            data: response.data.list[i].dataRegistro,
+            login: response.data.list[i].loginRegistro,
+            tipo: response.data.list[i].tipoApontamento,
+            matricula: response.data.list[i].matricula,
+          });
+        }
+      }
+      setListApontamentos(inventario_lista);
+    }catch (err) {
+      console.log('Erro: ', err);
     }
-    setListApontamentos(inventario_lista);
   }
 
   async function confirmDelete(id){
@@ -49,9 +66,8 @@ export default function Apontamentos({ navigation }) {
   }
 
   async function handleDelet(id){
-    console.log('ID do apontamento: ', id);
     api.defaults.headers.Authorization = `Bearer ${token}`;
-    const response = await api.delete(`api/v1/inventario/${id}`);
+    const response = await api.delete(`/v1/inventario/${id}`);
     console.log(response.data);
 
     setListApontamentos(
@@ -65,15 +81,13 @@ export default function Apontamentos({ navigation }) {
           <Image source={logo} style={{alignSelf: 'center'}}/>
           <Form>
             <Title>Apontamentos Cadastrados</Title>
-            <ScrollView style={{height: 200}}>
-                  <List
-                    data={listApontamentos}
-                    keyExtractor={item=>String(item.id)}
-                    renderItem={({ item }) => <Cards  onNavigate={()=>navigation.navigate("Apontamento",{apontamento: item})} onCancel={()=> confirmDelete(item.id)} data={item} userData={user}/> }
-                  />
-            </ScrollView>
+            <List
+              data={listApontamentos}
+              keyExtractor={item=>String(item.id)}
+              renderItem={({ item }) => <Cards  onNavigate={()=>navigation.navigate("Apontamento",{apontamento: item})} onCancel={()=> confirmDelete(item.id)} data={item} userData={user}/> }
+            />
             <SubmitButton onPress={()=> navigation.navigate('Inicial')}>
-                  Voltar
+              Voltar
             </SubmitButton>
           </Form>
       </Container>

@@ -19,9 +19,9 @@ export default function Produtos({ data, userData, onCancel }) {
             </Info>
         </Left>
         
-        <TouchableOpacity onPress={onCancel}>
+        <Action onPress={onCancel}>
             <Icon name="delete" size={20} color="#f64c75"/>
-        </TouchableOpacity>
+        </Action>
     </Container>
   );
 }

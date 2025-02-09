@@ -1,15 +1,12 @@
 import styled from 'styled-components/native';
 
 export const Container = styled.View`
-    margin-bottom:15px;
-    width: 100%;
-    padding:20px;
-    border-radius: 4px;
-    background: #fff;
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
+    position: relative;
+    width: 80%;
 `;
 
 export const Left = styled.View`
@@ -47,5 +44,6 @@ export const Expires = styled.Text`
 `;
 
 export const Action = styled.TouchableOpacity`
-    margin-left: -20px;
+   position: absolute;
+   right: -20px;
 `;

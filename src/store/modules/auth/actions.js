@@ -1,14 +1,14 @@
-export function signInRequest(email, password, filial) {
+export function signInRequest(email, password) {
   return {
     type: '@auth/SIGN_IN_REQUEST',
-    payload: { email, password, filial },
+    payload: { email, password },
   };
 }
 
-export function signInRefresh(email, password, filial) {
+export function signInRefresh(email, password) {
   return {
     type: '@auth/SIGN_IN_REFRESH',
-    payload: { email, password, filial },
+    payload: { email, password },
   };
 }
 

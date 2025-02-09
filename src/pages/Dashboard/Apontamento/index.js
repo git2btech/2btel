@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Image,ScrollView,Alert } from 'react-native';
+import { Image, ScrollView, Alert, CheckBox, View } from 'react-native';
 import Background from '../../../components/Background';
 import logo from '../../../assets/img/logo-2btech.png';
 import api from '../../../services/api';
 import Produtos from '../../../components/Produtos';
-import { Container, Content, SubmitButton, List,ContentTitle,ContentText } from './styles';
-import {} from '../ApontamentoItem/styles';
+import { Container, Content, SubmitButton, List,ContentTitle,ContentText, ItemCard } from './styles';
 
 export default function Apontamento({ navigation }) {
   const apontamentoData = navigation.getParam('apontamento');
   const token = useSelector(state=> state.auth.token);
   const user = useSelector(state => state.user.profile);
   const [inventario, setInventario] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]);
  
   function getTipo(type){
     let tipo = '';
@@ -55,31 +55,44 @@ export default function Apontamento({ navigation }) {
   }
 
   useEffect(()=>{
+    console.log(apontamentoData)
     getItens();
   },[]);
 
   async function getItens(){
-    let inventario_lista = [];
-    api.defaults.headers.Authorization = `Bearer ${token}`;
-    console.log('Id do apontamento: ', apontamentoData.id)
-    const response = await api.get('/api/v1/inventario/'+apontamentoData.id+'/item?ps=50&page=1');
-    
-    console.log('Veio isso: ', response.data);
-    if(response.data.List.length > 0){
-      for (let i = 0; i < response.data.List.length; i++){
-        inventario_lista.push({
-          id: response.data.List[i].Id,
-          codigoProduto: response.data.List[i].CodigoProduto,
-          numeroSelecao: response.data.List[i].NumeroSelecao,
-          nomeProduto: response.data.List[i].NomeProduto,
-          quantidade: response.data.List[i].Quantidade,
-          loginRegistro: response.data.LoginRegistro,
-        });
+    try{
+      let inventario_lista = [];
+      api.defaults.headers.Authorization = `Bearer ${token}`;
+      const response = await api.get(`/v1/inventario/${apontamentoData.id}`);
+      if(response.data && response.data.items.length > 0){
+          const hasValidItems = response.data.items.some(item => item !== null);
+          if(hasValidItems){
+            for (let i = 0; i < response.data.items.length; i++){
+              inventario_lista.push({
+                id: response.data.items[i].id,
+                codigoProduto: response.data.items[i].codigoProduto,
+                numeroSelecao: response.data.items[i].numeroSelecao,
+                nomeProduto: response.data.items[i].nomeProduto,
+                quantidade: response.data.items[i].quantidade,
+                loginRegistro: response.data.loginRegistro,
+              });
+          }
       }
-      inventario_lista.sort((a,b) => b.id - a.id);
+        inventario_lista.sort((a,b) => b.id - a.id);
+      }
+      setInventario(inventario_lista);
+    }catch (err) {
+      console.log('Erro: ', err);
     }
-    setInventario(inventario_lista);
   }
+
+  const toggleSelectItem = (itemId) => {
+    if (selectedItems.includes(itemId)) {
+      setSelectedItems(selectedItems.filter(id => id !== itemId));
+    } else {
+      setSelectedItems([...selectedItems, itemId]);
+    }
+  };
 
   async function confirmDelete(id){
     Alert.alert(
@@ -97,13 +110,32 @@ export default function Apontamento({ navigation }) {
     );
   }
 
-  async function handleDelet(id){
+  async function handleDelete(id){
+    console.log('Itens selecionados: ', id);
     setInventario(
       inventario.filter(inventario =>inventario.id !== id)
     );
     api.defaults.headers.Authorization = `Bearer ${token}`;
-    const response = await api.delete(`api/v1/inventario/${apontamentoData.id}/item/${id}`);
+    const response = await api.delete(`/v1/inventario-item/${id}`);
     console.log(response.data);
+  }
+
+  async function handleMassDelete() {
+    
+    Alert.alert(
+      'Aviso!',
+      'Você deseja deletar os itens selecionados?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'OK', onPress: async () => {
+          for (const id of selectedItems) {
+            await handleDelete(id);
+          }
+          setSelectedItems([]);
+        }},
+      ],
+      { cancelable: false }
+    );
   }
 
   return (
@@ -111,18 +143,31 @@ export default function Apontamento({ navigation }) {
       <Container>
         <Image source={logo}/>
         <Content>
-          <ScrollView>
-            <ContentText>Tipo: {getTipo(apontamentoData.tipo)}</ContentText>
+            <ContentText>Tipo: {apontamentoData.tipo}</ContentText>
             <ContentText>Data: {apontamentoData.data}</ContentText>
             <ContentTitle>Itens Cadastrados</ContentTitle>
-            <ScrollView style={{height: 200}}>
-              <List
-                data={inventario}
-                keyExtractor={item=>String(item.id)}
-                //renderItem={({ item }) => <Produtos onCancel={()=> null} data={item} userData={user}/> }
-                renderItem={({ item }) => <Produtos onCancel={()=> confirmDelete(item.id)} data={item} userData={user}/> }
-              />
-            </ScrollView>
+            <List
+              data={inventario}
+              keyExtractor={item => String(item.id)}
+              renderItem={({ item }) => (
+                <ItemCard>
+                  <CheckBox
+                    value={selectedItems.includes(item.id)}
+                    onValueChange={() => toggleSelectItem(item.id)}
+                  />
+                  <Produtos
+                    onCancel={() => confirmDelete(item.id)}
+                    data={item}
+                    userData={user}
+                  />
+                </ItemCard>
+              )}
+            />
+            {selectedItems.length > 0 && 
+              <SubmitButton onPress={handleMassDelete}>
+                Deletar Selecionados
+              </SubmitButton>
+            }
             <SubmitButton onPress={()=>navigation.navigate("ApontamentoItem",{apontamentoData:apontamentoData})}>
               Escanear Item
             </SubmitButton>
@@ -132,7 +177,6 @@ export default function Apontamento({ navigation }) {
             <SubmitButton onPress={() => navigation.navigate('Apontamentos')}>
               Voltar
             </SubmitButton>
-          </ScrollView>
         </Content>
       </Container>
     </Background>

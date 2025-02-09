@@ -28,6 +28,11 @@ export const SubmitButton = styled(Button)`
     margin-top:5px;
 `;
 
+export const BackButton = styled(Button)`
+    margin-top:5px;
+    width: 360px;
+`;
+
 export const SignLink = styled.TouchableOpacity`
     margin-top:20px;
 `;

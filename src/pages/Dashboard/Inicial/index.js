@@ -4,13 +4,13 @@ import { useDispatch,useSelector } from 'react-redux';
 import { signOut } from '../../../store/modules/auth/actions';
 import Background from '../../../components/Background';
 import logo from '../../../assets/img/logo-2btech.png';
-import useLocation from '../../../hooks/useLocation';
+// import useLocation from '../../../hooks/useLocation';
 import { Container, ButtonContent, SubmitButton, Intro } from './styles';
 
 export default function Inicial({ navigation }) {
   const dispatch = useDispatch();
   const user = useSelector(state => state.user.profile);
-  const { coords, errorMsg } = useLocation();
+  // const { coords, errorMsg } = useLocation();
 
   useEffect(()=>{
     if(user){
@@ -37,10 +37,10 @@ export default function Inicial({ navigation }) {
         <ButtonContent>
           <ScrollView>
             <Intro>Olá {user.name} seja bem vindo, para adicionar um inventário clique em adicionar apontamento.</Intro>
-            <SubmitButton onPress={()=>navigation.navigate("EscanearApontamento",{coords: coords})}>
+            <SubmitButton onPress={()=>navigation.navigate("EscanearApontamento")}>
               Escanear Apontamento
             </SubmitButton>
-            <SubmitButton onPress={()=>navigation.navigate("CriarApontamento",{coords: coords})}>
+            <SubmitButton onPress={()=>navigation.navigate("CriarApontamento")}>
               Adicionar Apontamento
             </SubmitButton>
             <SubmitButton onPress={()=>navigation.navigate("Apontamentos")}>

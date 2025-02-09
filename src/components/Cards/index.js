@@ -5,21 +5,29 @@ import { Container, Left, Bandeira, Info, Nome, Numero, Expires } from './styles
 
 export default function Cards({ userData, data, onCancel, onNavigate }) {
     let bandeira = '';
+        /* 
+            Tipos Conhecidos
+
+            Maquina, Deposito, Expedicao, Recebimento, Producao, 
+            Qualidade, OrdemServico, Scrap, Recon, Outros, Compras, 
+            InventarioDeposito, InventarioMaquina, AbastecimentoDeposito, 
+            AbastecimentoMaquina
+        */
     function getBandeira(type){
         switch(type){
-            case 1:
+            case "Maquina":
             bandeira = require('../../assets/img/vending-machine.png');
             break;
-            case 2:
+            case "Deposito":
             bandeira = require('../../assets/img/deposit.png');
             break;
-            case 3:
+            case "Expedicao":
             bandeira = require('../../assets/img/expedition.png');
             break;
-            case 4:
+            case "Recebimento":
             bandeira = require('../../assets/img/received.png');
             break;
-            case 10:
+            case "Outros":
             bandeira = require('../../assets/img/other.png');
             break;
             default:
@@ -31,38 +39,50 @@ export default function Cards({ userData, data, onCancel, onNavigate }) {
     function getTipo(type){
         let tipo = '';
         switch(type){
-          case 1:
+          case "Maquina":
             tipo = 'Maquina';
           break;
-          case 2:
+          case "Deposito":
               tipo = 'Depósito';
           break;
-          case 3:
+          case "Expedicao":
               tipo = 'Expedição';
           break;
-          case 4:
+          case "Recebimento":
               tipo = 'Recebimento';
           break;
-          case 5:
+          case "Producao":
               tipo = 'Producao';
           break;
-          case 6:
+          case "Qualidade":
               tipo = 'Qualidade';
           break;
-          case 7:
+          case "OrdemServico":
               tipo = 'Ordem de Servico';
           break;
-          case 8:
+          case "Scrap":
               tipo = 'Scrap';
           break;
-          case 9:
+          case "Recon":
               tipo = 'Recon';
           break;
-          case 10:
+          case "Outros":
               tipo = 'Outros';
           break;
-          case 11:
+          case "Compras":
             tipo = 'Compras';
+          break;
+          case "InventarioDeposito":
+            tipo = 'Inventario Deposito';
+          break;
+          case "InventarioMaquina":
+            tipo = 'Inventario Maquina';
+          break;
+          case "AbastecimentoDeposito":
+            tipo = 'Abastecimento Deposito';
+          break;
+          case "AbastecimentoMaquina":
+            tipo = 'Abastecimento Maquina';
           break;
         }
         return tipo;

@@ -8,7 +8,6 @@ import { Container, Form, FormInput, SubmitButton,SignLink,SignLinkText } from '
 
 export default function SignIn({ navigation }) {
   const dispatch = useDispatch();
-  const [filial,setFilial] = useState('');
   const [email,setEmail] = useState('');
   const [password,setPassword] = useState('');
   const user = useSelector(state => state.user.profile);
@@ -28,7 +27,7 @@ export default function SignIn({ navigation }) {
   },[]);
 
   function handleSubmit(){
-    dispatch(signInRequest(email,password,filial));
+    dispatch(signInRequest(email,password));
   }
   
   return (
@@ -37,15 +36,6 @@ export default function SignIn({ navigation }) {
         <Image source={logo}/>
         <Form>
           <ScrollView>
-            <FormInput 
-              icon="business"
-              keyboardType="numeric"
-              keyboardCorrect={false}
-              autoCapitalize="none"
-              placeholder="Digite sua filial"
-              value={filial}
-              onChangeText={setFilial}
-            />
             <FormInput 
               icon="perm-identity"
               keyboardType="email-address"
