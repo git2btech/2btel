@@ -10,4 +10,5 @@ export type UserDTO = {
     dominio: string;
     filialId: number;
     role: string;
+    hasSetGroup: boolean;
 }

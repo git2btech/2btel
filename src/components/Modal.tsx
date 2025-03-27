@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { ReactNode } from "react";
 import {
   Center,
   Heading,
@@ -12,40 +12,32 @@ import {
   Icon,
   Button,
   ButtonText,
+  Divider
 } from "@gluestack-ui/themed";
 import { X } from "lucide-react-native";
-import { DataSelect, Select } from "./Select";
 
 type ModalProps = {
   showModal?: boolean;
-  data: DataSelect[];
+  children: ReactNode
   onValueChange?: (value: string) => void;
   onCloseModal: () => void;
 };
 
-export function Modal({ showModal = true, data, onValueChange, onCloseModal }: ModalProps) {
-  const [selectedValue, setSelectedValue] = useState<string | null>(null);
-
-  const handleValueChange = (value: string) => {
-    setSelectedValue(value);
-    if (onValueChange) {
-      onValueChange(value);
-    }
-  };
-
+export function Modal({ showModal = true, children, onCloseModal }: ModalProps) {
   return (
     <Center className="h-[300px]">
       <GluestackModal isOpen={showModal} onClose={() => onCloseModal()} size="lg">
         <ModalBackdrop />
         <ModalContent>
           <ModalHeader>
-            <Heading size="md">Selecione um grupo</Heading>
+            <Heading size="md">Ação Necessária</Heading>
             <ModalCloseButton>
               <Icon as={X} size="md" />
             </ModalCloseButton>
           </ModalHeader>
+          <Divider />
           <ModalBody>
-            <Select defaultValue={selectedValue || ""} onValueChange={handleValueChange} data={data}/>
+            {children}
           </ModalBody>
           <ModalFooter gap="$4">
             <Button bg="$red500" onPress={() => onCloseModal()}>

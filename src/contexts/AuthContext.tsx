@@ -6,6 +6,7 @@ import api from "@services/api";
 
 export type AuthContextDataProps = {
     user: UserDTO;
+    updateProfileAndPermissions: (userUpdated: UserDTO) => Promise<void>;
     signIn: (userName: string, password: string) => Promise<void>;
     signOut: () => Promise<void>;
     isLoadingStorageData: boolean;
@@ -35,8 +36,8 @@ export function AuthContextProvider({ children }: AuthContextProviderProps){
             const { data } = await api.post('/auth/entrar', {userName, password});
             if(data && data?.accessToken){
                 const { Dominio, EntidadeId, Id, Nome, email, role } = jwtDecode<MyJwtPayload>(data?.accessToken);
-                setUser({accessToken: data.accessToken,refreshToken: data.refreshToken,expiresIn: data.expiresIn,id: Id,name: Nome,email: email,userName: userName,dominio: Dominio,entidadeId: EntidadeId,filialId: 0,role: role});
-                storageUserSave({accessToken: data.accessToken,refreshToken: data.refreshToken,expiresIn: data.expiresIn,id: Id,name: Nome,email: email,userName: userName,dominio: Dominio,entidadeId: EntidadeId,filialId: 0,role: role})
+                setUser({accessToken: data.accessToken,refreshToken: data.refreshToken,expiresIn: data.expiresIn,id: Id,name: Nome,email: email,userName: userName,dominio: Dominio,entidadeId: EntidadeId,filialId: 0,role: role, hasSetGroup: false});
+                await storageUserSave({accessToken: data.accessToken,refreshToken: data.refreshToken,expiresIn: data.expiresIn,id: Id,name: Nome,email: email,userName: userName,dominio: Dominio,entidadeId: EntidadeId,filialId: 0, role: role, hasSetGroup: false})
                 //const groups = await getProfileAndPermissions(Id);
             }
         } catch (error) {
@@ -56,8 +57,13 @@ export function AuthContextProvider({ children }: AuthContextProviderProps){
         }
     }
 
-    async function getProfileAndPermissions(id: string){
-        // storageUserSave()
+    async function updateProfileAndPermissions(userUpdated: UserDTO){
+        try{
+            setUser(userUpdated);
+            await storageUserSave(userUpdated);
+        } catch (error) {
+            throw error;
+        }
     }
 
     async function loadUserData(){
@@ -78,7 +84,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps){
     }, [])
 
     return(
-        <AuthContext.Provider value={{user, signIn, isLoadingStorageData, signOut}}>
+        <AuthContext.Provider value={{user, signIn, isLoadingStorageData, signOut, updateProfileAndPermissions}}>
             {children}
         </AuthContext.Provider>
     )

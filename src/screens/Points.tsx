@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { VStack, Text, HStack, Heading, useToast } from '@gluestack-ui/themed';
 import { HomeHeader } from '@components/HomeHeader';
 import { Group } from '@components/Group';
@@ -12,36 +12,61 @@ import axios from 'axios';
 import { ToastMessage } from '@components/ToastMessage';
 import { DataSelect, Select } from '@components/Select';
 import { Modal } from '@components/Modal';
+import { PointsDTO } from '@dtos/PointsDTO';
+import { Loading } from '@components/Loading';
 
+type UserGroup = {
+    acessaGrupo: boolean,
+    dominio: string,
+    entidadeAtiva: boolean,
+    entidadeId: number,
+    id: string,
+    nome: string,
+    todasFiliais: boolean,
+    userId: boolean,
+    codigo? : number,
+    filialId? : number
+}
 
 export function Points(){
-    const { user } = useAuth();
     const toast = useToast();
-    const [showModal, setShowModal] = useState(false)
-    const [points, setPoints] = useState(["Maquina","Maquina","Maquina","Maquina","Maquina","Maquina"]);
-    const [pointsGroup, setPointsGroup] = useState(["Maquina","Deposito","Expedicao","Recebimento","Outros"]);
-    const [group, setGroup] = useState<DataSelect[]>([]);
-    const [groupSelected, setGroupSelected] = useState("Maquina");
+    const { user, updateProfileAndPermissions } = useAuth();
     const navigation = useNavigation<AppNavigatorRoutesProps>();
-    const [modalValue, setModalValue] = useState<string | null>(null);
-
-    const handleSelectValueChange = (value: string) => {
-        setModalValue(value);
-        setShowModal(false);
-    };
-
-    function handleOpenExcerciseDetails(){
-        navigation.navigate("pointsItens");
+    const dataInicial = "2025-01-01T00:00:01";
+    const dataFinal = new Date().toISOString().split('.')[0];
+    const pointsGroup = ["Maquina","Deposito","Expedicao","Recebimento","Outros"];
+    const [showModal, setShowModal] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [points, setPoints] = useState<PointsDTO[]>([]);
+    const [groups, setGroups] = useState<UserGroup[]>([]);
+    const [group, setGroup] = useState<DataSelect[]>([]);
+    const [subGroups, setSubGroups] = useState<UserGroup[]>([]);
+    const [subGroup, setSubGroup] = useState<DataSelect[]>([]);
+    const [groupSelected, setGroupSelected] = useState("Maquina");
+    const [selectedGroupValue, setSelectedGroupValue] = useState<string | null>(null);
+    const [selectedSubGroupValue, setSelectedSubGroupValue] = useState<string | null>(null);
+    
+    function handleOpenExcerciseDetails(pointID: number){
+        navigation.navigate("pointsItens", {pointID});
     }
 
     async function getUserGroups() {
         try{
             const response = await api.get(`/permissao-usuario/${user.id}`, { 'headers': { 'Authorization': `Bearer ${user.accessToken}` } });
             if(response.data && response.data.grupos.length >= 1){
+                setGroups(response.data.grupos);
                 let dataGroups: DataSelect[] = [];
                 response.data.grupos.map((g: any) => {
                     dataGroups.push({value: g.id, label: g.nome})
                 })
+                if(response.data.subGrupos.length >= 1){
+                    setSubGroups(response.data.subGrupos);
+                    let dataSubGroups: DataSelect[] = [];
+                    response.data.subGrupos.map((g: any) => {
+                        dataSubGroups.push({value: g.id, label: g.nome})
+                    });
+                    setSubGroup(dataSubGroups);
+                }
                 setGroup(dataGroups);
                 setShowModal(true);
             }
@@ -59,22 +84,88 @@ export function Points(){
         
     }
 
-    useEffect(() => {
-        getUserGroups();
-    }, [])
-
-    useEffect(() => {
-        if(modalValue === ""){
-            setShowModal(true);
-            const toastId = toast.show({
+    async function saveUserGroup() {
+        if(!selectedGroupValue || selectedGroupValue === ""){
+            return toast.show({
                 placement: "top",
                 render: ({ id }) => (
                     <ToastMessage id={id} title="Grupo não especificado" description="Você deve selecionar um grupo da lista" action="error" onClose={()=>toast.close(id)} />
                 )
             })
-            return () => toast.close(toastId);
         }
-    }, [modalValue])
+        
+        const groupFinded = Array.isArray(groups) ? groups.find(g => g.id === selectedGroupValue) : undefined;
+        const subGroupFinded = Array.isArray(subGroups) ? subGroups.find(g => g.id === selectedSubGroupValue) : undefined;
+
+        if(!groupFinded || groupFinded == undefined){
+            return toast.show({
+                placement: "top",
+                render: ({ id }) => (
+                    <ToastMessage id={id} title="Grupo não especificado" description="Esse grupo não esta especificado" action="error" onClose={()=>toast.close(id)} />
+                )
+            })
+        }
+        const url = `auth/trocar-filial?entidadeId=${groupFinded.entidadeId}${subGroupFinded ? '&filialId='+ subGroupFinded.filialId : ''}`;
+        const response = await api.get(url, { 'headers': { 'Authorization': `Bearer ${user.accessToken}` } });
+        if(response.data){
+            const {accessToken, expiresIn, refreshToken} = response.data
+            await updateProfileAndPermissions({
+                ...user,
+                entidadeId: groupFinded.entidadeId,
+                dominio: groupFinded.dominio,
+                hasSetGroup: true,
+                accessToken: accessToken,
+                refreshToken: expiresIn,
+                expiresIn: refreshToken,
+            })
+        }
+        setShowModal(false);
+        getUserPoints();
+    }
+
+    async function getUserPoints() {
+        try{
+            setIsLoading(true);
+            const response = await api.get(`/inventario?dataFinal=${dataFinal}&dataInicial=${dataInicial}`, { 'headers': { 'Authorization': `Bearer ${user.accessToken}` } });
+           if(response.data && response.data.list){
+            setPoints(response.data.list);
+           }
+        }catch(e){
+            console.log('Erro: ', e)
+            if(axios.isAxiosError(e)){
+                return toast.show({
+                    placement: "top",
+                    render: ({ id }) => (
+                        <ToastMessage id={id} title="Erro ao resgatar grupos" description={e.response?.data?.errors[0]} action="error" onClose={()=>toast.close(id)} />
+                    )
+                })
+            }
+        }finally{
+            setIsLoading(false);
+        }
+    }
+
+    function handleValueGroupChange(value: string){
+        setSelectedGroupValue(value);
+    }
+
+    function handleValueSubGroupChange(value: string){
+        setSelectedSubGroupValue(value);
+    }
+
+    useEffect(() => {
+        if(user && user.hasSetGroup){
+            getUserPoints();
+        } else {
+            getUserGroups();
+        }
+    }, []);
+
+    useFocusEffect(useCallback(() => {
+        if(user && user.hasSetGroup){
+            getUserPoints();
+        }
+    }, [groupSelected]))
 
     return (
         <VStack flex={1}>
@@ -99,31 +190,41 @@ export function Points(){
                     minHeight: 44
                 }}
             />
+            {isLoading ? <Loading /> :
+                <VStack px="$8" flex={1}>
+                    <HStack justifyContent="space-between" mb="$5" alignItems="center">
+                        <Heading color="white" fontSize="$md" fontFamily="$heading">Apontamentos</Heading>
+                        <Text color="white" fontSize="$sm" fontFamily="$body">{points.length}</Text>
+                    </HStack>
 
-            <VStack px="$8" flex={1}>
-                <HStack justifyContent="space-between" mb="$5" alignItems="center">
-                    <Heading color="white" fontSize="$md" fontFamily="$heading">Apontamentos</Heading>
-                    <Text color="white" fontSize="$sm" fontFamily="$body">{points.length}</Text>
-                </HStack>
-
-                <Modal showModal={showModal} onValueChange={handleSelectValueChange} data={group} onCloseModal={() => setShowModal(false)}/>
-                {/* <FlatList 
-                    data={points} 
-                    keyExtractor={(item) => item}
-                    renderItem={({ item }) => (
-                        <PointCard onPress={handleOpenExcerciseDetails}/>
-                    )}
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingBottom: 20}}
-                    ListEmptyComponent={() => (
-                        <Text color="white" fontSize="$sm" fontFamily="$body">
-                            Parece que você ainda nao tem apontamentos cadastrados.
-                            Você pode estar adicionando novos apontamentos clicando no
-                            botão abaixo.
-                        </Text>
-                    )}
-                /> */}
-            </VStack>
+                    <Modal showModal={showModal} onCloseModal={() => saveUserGroup()}>
+                        <Text color="balck" fontSize="$sm" fontFamily="$body" mt="$5">Selecione um Grupo</Text>
+                        <Select defaultValue={selectedGroupValue || ""} onValueChange={handleValueGroupChange} data={group}/>
+                        {subGroup.length > 1 &&
+                            <>
+                                <Text color="balck" fontSize="$sm" fontFamily="$body" mt="$5">Selecione um Sub Grupo</Text>
+                                <Select defaultValue={selectedSubGroupValue || ""} onValueChange={handleValueSubGroupChange} data={subGroup}/>
+                            </>
+                        }
+                    </Modal>
+                    <FlatList 
+                        data={points} 
+                        keyExtractor={ item => item.id.toString()}
+                        renderItem={({ item }) => (
+                            <PointCard data={item} onPress={() => handleOpenExcerciseDetails(item.id)}/>
+                        )}
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={{ paddingBottom: 20}}
+                        ListEmptyComponent={() => (
+                            <Text color="white" fontSize="$sm" fontFamily="$body">
+                                Parece que você ainda nao tem apontamentos cadastrados.
+                                Você pode estar adicionando novos apontamentos clicando no
+                                botão abaixo.
+                            </Text>
+                        )}
+                    />
+                </VStack>
+            }
         </VStack>
     )
 }

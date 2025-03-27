@@ -18,7 +18,7 @@ type AppRoutes = {
     home: undefined;
     profile: undefined;
     points: undefined;
-    pointsItens: undefined;
+    pointsItens: { pointID: number };
     createPoint: undefined;
     createPointIten: undefined;
     scanPoint: undefined;
