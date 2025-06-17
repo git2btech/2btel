@@ -59,7 +59,7 @@ export function CreatePointIten(){
     const [produtoProps, setProdutoPros] = useState({
           produtoId: '',
           codigoProduto: '',
-          nomeProduto: '',
+          NomeProduto: '',
     });
 
     function handleBackToPointList(){
@@ -91,13 +91,12 @@ export function CreatePointIten(){
     async function handlePointIten({ quantidade, chave}: FormDataProps){
         try{
             setLoad(true);
-            const response = await api.post('/inventario', {
+            const response = await api.post(`/inventario/${pointID}}/item`, {
                 apontamentoId: pointID,
                 ...produtoProps,
                 quantidade,
                 codigoChave: chave
             })
-            console.log(response.data);
             setLoad(false);
             return toast.show({
                 placement: "top",
@@ -106,7 +105,7 @@ export function CreatePointIten(){
                 )
             })
         } catch(e){
-            console.log(e);
+            console.log(e.response?.data?.errors);
             setLoad(false);
             if(axios.isAxiosError(e)){
                 return toast.show({
@@ -127,7 +126,7 @@ export function CreatePointIten(){
             setProdutoPros({
                 codigoProduto: produtoFiltered[0].codigo,
                 produtoId: item.id,
-                nomeProduto: produtoFiltered[0].title
+                NomeProduto: produtoFiltered[0].descricao
             })
             if (item) {
                 onChange(item.title);
@@ -150,7 +149,6 @@ export function CreatePointIten(){
                                 name="codigo"
                                 
                                 render={({ field: { onChange, value }}) => (
-                                    // <Input placeholder="Matricula:" value={value} autoCapitalize="none" onChangeText={onChange} errorMessage={errors.matricula?.message}/>
                                     <AutocompleteDropdown
                                         clearOnFocus={false}
                                         closeOnBlur={true}
