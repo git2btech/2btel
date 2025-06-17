@@ -25,8 +25,8 @@ export function Select({ onValueChange, defaultValue, data }: Props) {
 
   return (
     <GluestackSelect defaultValue={selectedValue} onValueChange={handleChange}>
-      <SelectTrigger variant="outline" size="md">
-        <SelectInput placeholder="Selecione uma opção" />
+      <SelectTrigger w="$full" backgroundColor="$primary000" size="md" height="$14" mb="$4">
+        <SelectInput placeholder="Selecione uma opção" flex={1}/>
         <SelectIcon className="mr-3" as={ChevronDownIcon} />
       </SelectTrigger>
       <SelectPortal>

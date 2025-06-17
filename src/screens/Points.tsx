@@ -14,6 +14,7 @@ import { DataSelect, Select } from '@components/Select';
 import { Modal } from '@components/Modal';
 import { PointsDTO } from '@dtos/PointsDTO';
 import { Loading } from '@components/Loading';
+import { Button } from '@components/Button';
 
 type UserGroup = {
     acessaGrupo: boolean,
@@ -48,6 +49,11 @@ export function Points(){
     
     function handleOpenExcerciseDetails(pointID: number){
         navigation.navigate("pointsItens", {pointID});
+    }
+
+    function handleOpenCreatePoint(){
+        navigation.navigate("createPoint");
+        
     }
 
     async function getUserGroups() {
@@ -214,7 +220,7 @@ export function Points(){
                             <PointCard data={item} onPress={() => handleOpenExcerciseDetails(item.id)}/>
                         )}
                         showsVerticalScrollIndicator={false}
-                        contentContainerStyle={{ paddingBottom: 20}}
+                        contentContainerStyle={{ paddingBottom: 10}}
                         ListEmptyComponent={() => (
                             <Text color="white" fontSize="$sm" fontFamily="$body">
                                 Parece que você ainda nao tem apontamentos cadastrados.
@@ -225,6 +231,9 @@ export function Points(){
                     />
                 </VStack>
             }
+            <VStack px="$8" pt="$4" pb="$4">
+                <Button title="Adicionar Apontamento" variant="solid" onPress={() => handleOpenCreatePoint()} />
+            </VStack>
         </VStack>
     )
 }

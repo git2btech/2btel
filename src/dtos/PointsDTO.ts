@@ -15,8 +15,8 @@ export type PointsItensDTO = {
 export type PointsDTO = {
     codigo: number,
     codigoDeposito: string,
-    dataApontamento: string,
-    dataRegistro: string,
+    dataApontamento?: string,
+    dataRegistro?: string,
     depositoId: number,
     id: number,
     items: PointsItensDTO[],

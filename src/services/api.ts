@@ -3,6 +3,7 @@ import axios from 'axios';
 
 const api = axios.create({
     baseURL: "https://portal.2btech.com.br/tmt/api/v1/"
+    //baseURL: "https://2btech.com.br/tmt/api/v1/"
 })
 
 // api.interceptors.response.use(response => response, error => {

@@ -23,6 +23,7 @@ interface MyJwtPayload extends JwtPayload {
     Nome: string;
     email: string;
     role: string;
+    exp: number;
 }
 
 export const AuthContext = createContext<AuthContextDataProps>({} as AuthContextDataProps);
@@ -33,7 +34,9 @@ export function AuthContextProvider({ children }: AuthContextProviderProps){
 
     async function signIn(userName: string, password: string){
         try{
+            console.log('oi');
             const { data } = await api.post('/auth/entrar', {userName, password});
+            console.log(data);
             if(data && data?.accessToken){
                 const { Dominio, EntidadeId, Id, Nome, email, role } = jwtDecode<MyJwtPayload>(data?.accessToken);
                 setUser({accessToken: data.accessToken,refreshToken: data.refreshToken,expiresIn: data.expiresIn,id: Id,name: Nome,email: email,userName: userName,dominio: Dominio,entidadeId: EntidadeId,filialId: 0,role: role, hasSetGroup: false});
@@ -69,8 +72,14 @@ export function AuthContextProvider({ children }: AuthContextProviderProps){
     async function loadUserData(){
         try{
             const userLoggedd = await storageUserGet();
-            if(userLoggedd){
-                setUser(userLoggedd);
+            console.log('Dados do usuario: ', userLoggedd);
+            const decoded = jwtDecode(userLoggedd.accessToken);
+            const now = Math.floor(Date.now() / 1000); // tempo atual em segundos
+
+            if (decoded.exp && decoded.exp > now && userLoggedd) {
+                if(userLoggedd){
+                    setUser(userLoggedd);
+                }
             }
         } catch (error) {
             throw error;
