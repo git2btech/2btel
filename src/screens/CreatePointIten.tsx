@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import api from '@services/api';
 import * as yup from 'yup';
@@ -48,7 +48,7 @@ export function CreatePointIten(){
     console.log("ID =>", point);
     const navigation = useNavigation<AppNavigatorRoutesProps>();
     const toast = useToast();
-    const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
+    const { control, handleSubmit, formState: { errors }, reset  } = useForm<FormDataProps>({
             resolver: yupResolver(pointUpSchema)
     });
     const [load, setLoad] = useState<boolean>(false);
@@ -62,10 +62,29 @@ export function CreatePointIten(){
           codigoProduto: '',
           NomeProduto: '',
     });
-
+    const [hasOcOption, setHasOcOption] = useState(false);
     function handleBackToPointList(){
         navigation.navigate("pointsItens", {pointID: point.id})
     }
+
+    function resetForm() {
+        reset({
+            codigo: '',
+            quantidade: '',
+            chave: '',
+        });
+
+        setProdutoPros({
+            produtoId: '',
+            codigoProduto: '',
+            NomeProduto: '',
+        });
+
+        setDataProduto([]);
+        setDataProdutos([]);
+        setHasOcOption(false);
+    }
+
 
     async function getProduto(text: string){
         console.log(text);
@@ -99,6 +118,7 @@ export function CreatePointIten(){
                 codigoChave: chave
             })
             setLoad(false);
+            resetForm();
             return toast.show({
                 placement: "top",
                 render: ({ id }) => (
@@ -124,20 +144,37 @@ export function CreatePointIten(){
 
     function handleProductSelect(item: { id: string; title: string } | null, onChange: (value: string) => void) {
         if(!item) return;
-            const produtoFiltered = dataProdutos.filter(function (el: any) {
-                return el.id == item.id;
-            });
-            setProdutoPros({
-                codigoProduto: produtoFiltered[0].codigo,
-                produtoId: item.id,
-                NomeProduto: produtoFiltered[0].descricao
-            })
-            if (item) {
-                onChange(item.title);
-            } else {
-                onChange("");
-            }
+        const produtoFiltered = dataProdutos.filter(function (el: any) {
+            return el.id == item.id;
+        });
+        setProdutoPros({
+            codigoProduto: produtoFiltered[0].codigo,
+            produtoId: item.id,
+            NomeProduto: produtoFiltered[0].descricao
+        })
+        if (item) {
+            onChange(item.title);
+        } else {
+            onChange("");
+        }
     }
+
+    useEffect(()=>{
+        switch(point.tipoApontamento){
+          case "Expedição":
+            getProduto('EXP001');
+          break;
+          case "Recebimento":
+            getProduto('REC001');
+          break;
+        }
+    },[point.tipoApontamento])
+    
+    useEffect(()=>{
+    if(produtoProps.NomeProduto.includes("OC")){
+        setHasOcOption(true);
+    }
+    },[produtoProps.NomeProduto])
 
     return (
         <VStack flex={1}>

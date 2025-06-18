@@ -37,7 +37,6 @@ const pointUpSchema = yup.object({
     tipoApontamento: yup.string().required("Informe o tipo do apontamento"),
     dataMatricula: yup.string().required("Informe a data da matriculas"),
     matricula: yup.string().required("Informe a matricula"),
-    codigo: yup.string().required("Informe o código"),
 });
 
 function getCurrentDateFormatted() {
@@ -58,7 +57,7 @@ export function CreatePoint(){
     const dataAtual =  moment().format('YYYY-MM-DDTHH:mm:ss');
     const navigation = useNavigation<AppNavigatorRoutesProps>();
     const toast = useToast();
-    const { control, handleSubmit, formState: { errors }, watch } = useForm<FormDataProps>({
+    const { control, handleSubmit, formState: { errors }, watch, reset  } = useForm<FormDataProps>({
             resolver: yupResolver(pointUpSchema),
             defaultValues: {
                 dataMatricula: dataAgora,
@@ -80,6 +79,32 @@ export function CreatePoint(){
         codigoDeposito: '',
         nomeDeposito: '' 
     });
+
+    function resetForm() {
+        reset({
+            tipoApontamento: '',
+            dataMatricula: moment().format('DD/M/YYYY HH:mm'),
+            matricula: '',
+            codigo: ''
+        });
+
+        setMaquinaProps({
+            maquinaId: '',
+            matricula: '',
+            modeloMaquina: '' 
+        });
+
+        setDepositoProps({
+            depositoId: '',
+            codigoDeposito: '',
+            nomeDeposito: '' 
+        });
+
+        setDataMatriculas([]);
+        setDataDepositos([]);
+        setDataComplete([]);
+    }
+
 
     function handleBackToPointList(){
         navigation.navigate("points");
@@ -191,6 +216,16 @@ export function CreatePoint(){
                 longitude: 0
             })
             setLoad(false);
+            resetForm();
+            return toast.show({
+                placement: "top",
+                render: ({ id }) => (
+                    <ToastMessage id={id} title="Sucesso" description="Apontamento criado com sucesso!" action="success" onClose={()=>navigation.navigate("points")} />
+                ),
+                onCloseComplete() {
+                    navigation.navigate("points")
+                },
+            })
         } catch(e){
             console.log(e)
             setLoad(false);
