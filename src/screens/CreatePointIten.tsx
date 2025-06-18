@@ -15,9 +15,10 @@ import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
 import { Dimensions } from 'react-native';
+import { PointsDTO } from '@dtos/PointsDTO';
 
 type RouteParamsProps = {
-    pointID: number
+    point: PointsDTO
 }
 
 type FormDataProps = {
@@ -43,8 +44,8 @@ const pointUpSchema = yup.object({
 export function CreatePointIten(){
     const { user } = useAuth();
     const route = useRoute();
-    const { pointID } = route.params as RouteParamsProps;
-    console.log("ID =>", pointID);
+    const { point } = route.params as RouteParamsProps;
+    console.log("ID =>", point);
     const navigation = useNavigation<AppNavigatorRoutesProps>();
     const toast = useToast();
     const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
@@ -63,7 +64,7 @@ export function CreatePointIten(){
     });
 
     function handleBackToPointList(){
-        navigation.navigate("pointsItens", {pointID})
+        navigation.navigate("pointsItens", {pointID: point.id})
     }
 
     async function getProduto(text: string){
@@ -91,8 +92,8 @@ export function CreatePointIten(){
     async function handlePointIten({ quantidade, chave}: FormDataProps){
         try{
             setLoad(true);
-            const response = await api.post(`/inventario/${pointID}}/item`, {
-                apontamentoId: pointID,
+            const response = await api.post(`/inventario/${point.id}}/item`, {
+                apontamentoId: point.id,
                 ...produtoProps,
                 quantidade,
                 codigoChave: chave
@@ -101,8 +102,11 @@ export function CreatePointIten(){
             return toast.show({
                 placement: "top",
                 render: ({ id }) => (
-                    <ToastMessage id={id} title="Sucesso" description="Apontamento criado com sucesso!" action="success" onClose={()=>navigation.navigate("pointsItens", {pointID})} />
-                )
+                    <ToastMessage id={id} title="Sucesso" description="Apontamento criado com sucesso!" action="success" onClose={()=>navigation.navigate("pointsItens", {pointID: point.id})} />
+                ),
+                onCloseComplete() {
+                    navigation.navigate("pointsItens", {pointID: point.id})
+                },
             })
         } catch(e){
             console.log(e.response?.data?.errors);

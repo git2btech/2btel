@@ -7,7 +7,7 @@ import { AppNavigatorRoutesProps } from '@routes/app.routes';
 import { ToastMessage } from '@components/ToastMessage';
 import api from '@services/api';
 import axios from 'axios';
-import { PointsItensDTO } from '@dtos/PointsDTO';
+import { PointsItensDTO, PointsDTO } from '@dtos/PointsDTO';
 import { useAuth } from '@hooks/useAuth';
 import { PointCard } from '@components/PointCard';
 import { Button } from '@components/Button';
@@ -25,14 +25,15 @@ export function PointsItens(){
     const { pointID } = route.params as RouteParamsProps;
     console.log("ID =>", pointID);
     const [pointsItem, setPointsItem] = useState<PointsItensDTO[]>([]);
+    const [point, setPoint] = useState<PointsDTO>();
     const [isLoading, setIsLoading] = useState(false);
 
     function handleGoBack(){
         navigation.navigate("points");
     }
 
-    function handleOpenCreatePointIten(pointID: string){
-        navigation.navigate("createPointIten", {pointID});
+    function handleOpenCreatePointIten(point: PointsDTO){
+        navigation.navigate("createPointIten", {point});
     }
 
     async function getPointItens(){
@@ -41,6 +42,7 @@ export function PointsItens(){
             const response = await api.get(`/inventario/${pointID}`, { 'headers': { 'Authorization': `Bearer ${user.accessToken}` } });
             if(response.data && response.data.items){
                 console.log(response.data.items);
+                setPoint(response.data);
                 setPointsItem(response.data.items);
             }
         } catch(e){
@@ -107,7 +109,7 @@ export function PointsItens(){
                 </VStack>
             }
             <VStack px="$8" pt="$4" pb="$4">
-                <Button title="Adicionar Itens ao Apontamento" variant="solid" onPress={() => handleOpenCreatePointIten(pointID)} />
+                <Button title="Adicionar Itens ao Apontamento" variant="solid" onPress={() => handleOpenCreatePointIten(point)} />
             </VStack>
         </VStack>
     )
