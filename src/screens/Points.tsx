@@ -39,6 +39,7 @@ export function Points(){
     const [showModal, setShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [points, setPoints] = useState<PointsDTO[]>([]);
+    const [pointsFiltreds, setPointsFiltreds] = useState<PointsDTO[]>([]);
     const [groups, setGroups] = useState<UserGroup[]>([]);
     const [group, setGroup] = useState<DataSelect[]>([]);
     const [subGroups, setSubGroups] = useState<UserGroup[]>([]);
@@ -132,7 +133,7 @@ export function Points(){
     async function getUserPoints() {
         try{
             setIsLoading(true);
-            const response = await api.get(`/inventario?dataFinal=${dataFinal}&dataInicial=${dataInicial}`, { 'headers': { 'Authorization': `Bearer ${user.accessToken}` } });
+            const response = await api.get(`/inventario?dataFinal=${dataFinal}&dataInicial=${dataInicial}&pageSize=50`, { 'headers': { 'Authorization': `Bearer ${user.accessToken}` } });
            if(response.data && response.data.list){
             setPoints(response.data.list);
            }
@@ -177,7 +178,7 @@ export function Points(){
         <VStack flex={1}>
             <HomeHeader />
 
-            {/* <FlatList 
+            <FlatList 
                 data={pointsGroup} 
                 keyExtractor={(item) => item}
                 renderItem={({ item }) => (
@@ -195,7 +196,7 @@ export function Points(){
                     maxHeight: 44,
                     minHeight: 44
                 }}
-            /> */}
+            />
             {isLoading ? <Loading /> :
                 <VStack mt="$5" px="$8" flex={1}>
                     <HStack justifyContent="space-between" mb="$5" alignItems="center">
