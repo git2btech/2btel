@@ -94,6 +94,9 @@ export default function Cards({ userData, data, onCancel, onNavigate }) {
             <Bandeira source={getBandeira(data.tipo)}></Bandeira>
             <Info>
                 <Nome>{getTipo(data.tipo)}</Nome>
+                {data.cliente ? (
+                    <Numero>Cliente: {data.cliente}</Numero>
+                ) : null}
                 <Numero>Criado por: {data.login}</Numero>
                 <Expires>Data do registro: {data.data}</Expires>
             </Info>

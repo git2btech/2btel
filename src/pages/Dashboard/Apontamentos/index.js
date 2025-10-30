@@ -33,6 +33,7 @@ export default function Apontamentos({ navigation }) {
         }
       });
       if(response && response.data.list.length > 0){
+        console.log(response.data);
         for (let i = 0; i < response.data.list.length; i++){
           inventario_lista.push({
             id: response.data.list[i].id,
@@ -40,6 +41,7 @@ export default function Apontamentos({ navigation }) {
             login: response.data.list[i].loginRegistro,
             tipo: response.data.list[i].tipoApontamento,
             matricula: response.data.list[i].matricula,
+            cliente: response.data.list[i].nomeDeposito,
           });
         }
       }
