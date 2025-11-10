@@ -72,7 +72,6 @@ export function AuthContextProvider({ children }: AuthContextProviderProps){
     async function loadUserData(){
         try{
             const userLoggedd = await storageUserGet();
-            console.log('Dados do usuario: ', userLoggedd);
             const decoded = jwtDecode(userLoggedd.accessToken);
             const now = Math.floor(Date.now() / 1000); // tempo atual em segundos
 
