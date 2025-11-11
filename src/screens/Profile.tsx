@@ -15,6 +15,7 @@ import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { ToastMessage } from '@components/ToastMessage';
+import { Loading } from '@components/Loading';
 import api from '@services/api';
 
 type FormDataProps = {
@@ -129,76 +130,77 @@ export function Profile(){
     return (
         <VStack flex={1}>
             <ScreenHeader title='Perfil'/>
-            
-            <ScrollView contentContainerStyle={{ paddingBottom: 36 }}>
-                <Center mt="$6" px="$10">
-                    {userPhoto ? (
-                        <UserPhoto source={{ uri: userPhoto}} size="xl" alt="Foto de Perfil"/>
-                    ): (
-                        <UserPhoto source={userPhotoDefault} size="xl" alt="Foto de Perfil"/>
-                    )}
-                    
+            {load ? <Loading /> :
+                <ScrollView contentContainerStyle={{ paddingBottom: 36 }}>
+                    <Center mt="$6" px="$10">
+                        {userPhoto ? (
+                            <UserPhoto source={{ uri: userPhoto}} size="xl" alt="Foto de Perfil"/>
+                        ): (
+                            <UserPhoto source={userPhotoDefault} size="xl" alt="Foto de Perfil"/>
+                        )}
+                        
 
-                    <TouchableOpacity onPress={handleUserPhotoSelect}>
-                        <Text color="$gray500" fontFamily="$heading" fontSize="$md" mt="$2" mb="$8">Alterar Foto</Text>
-                    </TouchableOpacity>
+                        <TouchableOpacity onPress={handleUserPhotoSelect}>
+                            <Text color="$gray500" fontFamily="$heading" fontSize="$md" mt="$2" mb="$8">Alterar Foto</Text>
+                        </TouchableOpacity>
 
-                    <Center w="$full" gap="$4">
-                        <Controller 
-                            control={control} 
-                            name="name"
-                            render={({ field: { onChange, value }}) => (
-                                <Input placeholder="Nome: " value={value} autoCapitalize="none" onChangeText={onChange} errorMessage={errors.name?.message}/>
-                            )}
-                        />
-                        <Controller 
-                            control={control} 
-                            name="email"
-                            render={({ field: { onChange, value }}) => (
-                                <Input placeholder="E-mail: " value={value} autoCapitalize="none" onChangeText={onChange} errorMessage={errors.email?.message}/>
-                            )}
-                        />
+                        <Center w="$full" gap="$4">
+                            <Controller 
+                                control={control} 
+                                name="name"
+                                render={({ field: { onChange, value }}) => (
+                                    <Input placeholder="Nome: " value={value} autoCapitalize="none" onChangeText={onChange} errorMessage={errors.name?.message}/>
+                                )}
+                            />
+                            <Controller 
+                                control={control} 
+                                name="email"
+                                render={({ field: { onChange, value }}) => (
+                                    <Input placeholder="E-mail: " value={value} autoCapitalize="none" onChangeText={onChange} errorMessage={errors.email?.message}/>
+                                )}
+                            />
+                        </Center>
+
+                        <Heading
+                            alignSelf="flex-start"
+                            fontFamily="$heading"
+                            color="$gray500"
+                            fontSize="$md"
+                            mt="$12"
+                            mb="$2"
+                        >
+                            Alterar Senha
+                        </Heading>
+
+                        <Center w="$full" gap="$4">
+                            <Controller 
+                                control={control} 
+                                name="oldPassword"
+                                render={({ field: { onChange, value }}) => (
+                                    <Input placeholder="Senha Antiga: " secureTextEntry value={value} autoCapitalize="none" onChangeText={onChange} errorMessage={errors.oldPassword?.message}/>
+                                )}
+                            />
+                            <Controller 
+                                control={control} 
+                                name="newPassword"
+                                render={({ field: { onChange, value }}) => (
+                                    <Input placeholder="Nova Senha: " secureTextEntry value={value} autoCapitalize="none" onChangeText={onChange} errorMessage={errors.newPassword?.message}/>
+                                )}
+                            />
+                            <Controller 
+                                control={control} 
+                                name="confirmPassword"
+                                render={({ field: { onChange, value }}) => (
+                                    <Input placeholder="Confirme a Nova Senha: " secureTextEntry value={value} autoCapitalize="none" onChangeText={onChange} errorMessage={errors.confirmPassword?.message}/>
+                                )}
+                            />
+
+                            <Button onPress={handleSubmit(updateProfile)} title="Atualizar" />
+                            <Button backgroundColor="$red500" $active-backgroundColor="$red300" title="Sair" />
+                        </Center>
                     </Center>
-
-                    <Heading
-                        alignSelf="flex-start"
-                        fontFamily="$heading"
-                        color="$gray500"
-                        fontSize="$md"
-                        mt="$12"
-                        mb="$2"
-                    >
-                        Alterar Senha
-                    </Heading>
-
-                    <Center w="$full" gap="$4">
-                        <Controller 
-                            control={control} 
-                            name="oldPassword"
-                            render={({ field: { onChange, value }}) => (
-                                <Input placeholder="Senha Antiga: " secureTextEntry value={value} autoCapitalize="none" onChangeText={onChange} errorMessage={errors.oldPassword?.message}/>
-                            )}
-                        />
-                        <Controller 
-                            control={control} 
-                            name="newPassword"
-                            render={({ field: { onChange, value }}) => (
-                                <Input placeholder="Nova Senha: " secureTextEntry value={value} autoCapitalize="none" onChangeText={onChange} errorMessage={errors.newPassword?.message}/>
-                            )}
-                        />
-                        <Controller 
-                            control={control} 
-                            name="confirmPassword"
-                            render={({ field: { onChange, value }}) => (
-                                <Input placeholder="Confirme a Nova Senha: " secureTextEntry value={value} autoCapitalize="none" onChangeText={onChange} errorMessage={errors.confirmPassword?.message}/>
-                            )}
-                        />
-
-                        <Button onPress={handleSubmit(updateProfile)} title="Atualizar" />
-                        <Button backgroundColor="$red500" $active-backgroundColor="$red300" title="Sair" />
-                    </Center>
-                </Center>
-            </ScrollView>
+                </ScrollView>
+            }
         </VStack>
     )
 }

@@ -4,7 +4,7 @@ import api from '@services/api';
 import * as yup from 'yup';
 import { useAuth } from "@hooks/useAuth";
 import { useForm, Controller } from 'react-hook-form';
-import { VStack, Image, Center, Text, Heading, ScrollView, useToast } from "@gluestack-ui/themed";
+import { VStack, Image, Center, Text, Heading, ScrollView, useToast, Pressable, Icon, Box } from "@gluestack-ui/themed";
 import BackgroundImg from "@assets/background.png";
 import Logo from "@assets/logo.svg";
 import { Input } from "@components/Input";
@@ -13,6 +13,7 @@ import { AuthNavigatorRoutesProps } from "@routes/auth.routes";
 import { useNavigation } from "@react-navigation/native";
 import { yupResolver } from '@hookform/resolvers/yup';
 import { ToastMessage } from '@components/ToastMessage';
+import { Eye, EyeOff } from 'lucide-react-native';
 
 type FormDataProps = {
     userName: string;
@@ -29,6 +30,7 @@ export function SignIn (){
     const toast = useToast();
     const navigator = useNavigation<AuthNavigatorRoutesProps>();
     const [load, setLoad] = useState<boolean>(false);
+    const [showPwd, setShowPwd] = useState<boolean>(false);
     const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
         resolver: yupResolver(signUpSchema)
     });
@@ -83,13 +85,36 @@ export function SignIn (){
                             )}
                         />
 
-                        <Controller 
-                            control={control} 
-                            name="password"
-                            render={({ field: { onChange, value }}) => (
-                                <Input placeholder="Senha" secureTextEntry value={value} onChangeText={onChange} onSubmitEditing={handleSubmit(handleLogin)} returnKeyType="send" errorMessage={errors.password?.message}/>
-                            )}
-                        />
+                        <Box position="relative" w="$full">
+                            <Controller
+                                control={control}
+                                name="password"
+                                render={({ field: { onChange, value } }) => (
+                                    <Input
+                                        placeholder="Senha: "
+                                        value={value}
+                                        onChangeText={onChange}
+                                        onSubmitEditing={handleSubmit(handleLogin)}
+                                        returnKeyType="send"
+                                        errorMessage={errors.password?.message}
+                                        secureTextEntry={!showPwd}
+                                        autoComplete="password"
+                                        textContentType="password"
+                                    />
+                                )}
+                            />
+                            <Pressable
+                                onPress={() => setShowPwd((v) => !v)}
+                                position="absolute"
+                                right="$3"
+                                bottom="$2"
+                                h="100%"
+                                justifyContent="center"
+                                hitSlop={12}
+                            >
+                            <Icon as={showPwd ? EyeOff : Eye} size="lg" color="$secondary500" />
+                            </Pressable>
+                        </Box>
                         <Button title="Acessar" onPress={handleSubmit(handleLogin)} isLoading={load}/>
                     </Center>
 

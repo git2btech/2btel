@@ -178,7 +178,7 @@ export function Points(){
         <VStack flex={1}>
             <HomeHeader />
 
-            <FlatList 
+            {/* <FlatList 
                 data={pointsGroup} 
                 keyExtractor={(item) => item}
                 renderItem={({ item }) => (
@@ -196,7 +196,7 @@ export function Points(){
                     maxHeight: 44,
                     minHeight: 44
                 }}
-            />
+            /> */}
             {isLoading ? <Loading /> :
                 <VStack mt="$5" px="$8" flex={1}>
                     <HStack justifyContent="space-between" mb="$5" alignItems="center">
