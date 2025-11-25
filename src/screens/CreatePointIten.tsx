@@ -24,7 +24,7 @@ type RouteParamsProps = {
 type FormDataProps = {
     codigo: string;
     quantidade: string;
-    chave: string;
+    chave?: string | null;
 };
 
 const defaultPoint = [
@@ -38,7 +38,7 @@ const defaultPoint = [
 const pointUpSchema = yup.object({
     codigo: yup.string().required("Informe o codigo do apontamento"),
     quantidade: yup.string().required("Informe a quantidade dos itens"),
-    chave: yup.string().required("Informe a chave"),
+    chave: yup.string().nullable().notRequired(),
 });
 
 export function CreatePointIten(){
@@ -63,6 +63,7 @@ export function CreatePointIten(){
           NomeProduto: '',
     });
     const [hasOcOption, setHasOcOption] = useState(false);
+    const [dropdownKey, setDropdownKey] = useState(0);
     function handleBackToPointList(){
         navigation.navigate("pointsItens", {pointID: point.id})
     }
@@ -83,6 +84,7 @@ export function CreatePointIten(){
         setDataProduto([]);
         setDataProdutos([]);
         setHasOcOption(false);
+        setDropdownKey((prev) => prev + 1);
     }
 
 
@@ -121,6 +123,7 @@ export function CreatePointIten(){
             resetForm();
             return toast.show({
                 placement: "top",
+                duration: 1000,
                 render: ({ id }) => (
                     <ToastMessage id={id} title="Sucesso" description="Apontamento criado com sucesso!" action="success" onClose={()=>navigation.navigate("pointsItens", {pointID: point.id})} />
                 ),
@@ -134,6 +137,7 @@ export function CreatePointIten(){
             if(axios.isAxiosError(e)){
                 return toast.show({
                     placement: "top",
+                    duration: 1000,
                     render: ({ id }) => (
                         <ToastMessage id={id} title="Erro ao criar o item do apontamento" description={e.response?.data?.errors[0]} action="error" onClose={()=>toast.close(id)} />
                     )
@@ -191,6 +195,7 @@ export function CreatePointIten(){
                                 
                                 render={({ field: { onChange, value }}) => (
                                     <AutocompleteDropdown
+                                        key={dropdownKey}
                                         clearOnFocus={false}
                                         closeOnBlur={true}
                                         closeOnSubmit={false}

@@ -10,8 +10,8 @@ export function Home(){
         <VStack flex={1}>
             <ScrollView contentContainerStyle={{ paddingBottom: 36 }}>
                 <HomeHeader />
-                <LineChart />
-                <BarChart />
+                {/* <LineChart />
+                <BarChart /> */}
             </ScrollView>
         </VStack>
     )

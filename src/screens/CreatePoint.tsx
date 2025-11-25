@@ -69,6 +69,7 @@ export function CreatePoint(){
     const [dataMatriculas, setDataMatriculas] = useState([]);
     const [dataComplete, setDataComplete] = useState([]);
     const [dataDepositos, setDataDepositos] = useState([]);
+    const [dropdownKey, setDropdownKey] = useState(0);
     const [maquinaProps, setMaquinaProps] = useState({
         maquinaId: '',
         matricula: '',
@@ -103,6 +104,7 @@ export function CreatePoint(){
         setDataMatriculas([]);
         setDataDepositos([]);
         setDataComplete([]);
+        setDropdownKey((prev) => prev + 1);
     }
 
 
@@ -219,6 +221,7 @@ export function CreatePoint(){
             resetForm();
             return toast.show({
                 placement: "top",
+                duration: 2000,
                 render: ({ id }) => (
                     <ToastMessage id={id} title="Sucesso" description="Apontamento criado com sucesso!" action="success" onClose={()=>navigation.navigate("points")} />
                 ),
@@ -232,6 +235,7 @@ export function CreatePoint(){
             if(axios.isAxiosError(e)){
                 return toast.show({
                     placement: "top",
+                    duration: 2000,
                     render: ({ id }) => (
                         <ToastMessage id={id} title="Erro ao realizar o apontamento" description={e.response?.data?.errors[0]} action="error" onClose={()=>toast.close(id)} />
                     )
@@ -280,6 +284,7 @@ export function CreatePoint(){
                                     name="matricula"
                                     render={({ field: { onChange, value }}) => (
                                         <AutocompleteDropdown
+                                            key={dropdownKey}
                                             clearOnFocus={false}
                                             closeOnBlur={true}
                                             closeOnSubmit={false}
