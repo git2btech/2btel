@@ -1,4 +1,5 @@
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Box } from "@gluestack-ui/themed";
 import { gluestackUIConfig } from '../../config/gluestack-ui.config';
 import { useAuth } from "@hooks/useAuth";
@@ -17,9 +18,11 @@ export function Routes(){
 
     return (
         <Box flex={1} bg="$success100">
-            <NavigationContainer theme={theme}>
-                {user.id ? <AppRoutes /> : <AuthRoutes />}
-            </NavigationContainer>
+            <SafeAreaProvider>
+                <NavigationContainer theme={theme}>
+                    {user.id ? <AppRoutes /> : <AuthRoutes />}
+                </NavigationContainer>
+            </SafeAreaProvider>
         </Box>
     )
 }

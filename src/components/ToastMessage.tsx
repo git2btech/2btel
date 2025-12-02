@@ -14,7 +14,7 @@ export function ToastMessage({id, title, description, action, onClose}: Props){
         <Toast 
             nativeID={`toast-${id}`} 
             action={action} 
-            bgColor={action  === "success" ? "$green500" : "$red500"}
+            bgColor={action  === "success" ? "$green400" : "$red500"}
             mt="$10"
         >
             <VStack space="xs" w="$full">

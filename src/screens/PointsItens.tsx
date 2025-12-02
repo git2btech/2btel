@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { FlatList, TouchableOpacity } from 'react-native';
+import { FlatList, TouchableOpacity, Alert } from 'react-native';
 import { Text, VStack, Icon, HStack, Heading, useToast } from '@gluestack-ui/themed';
 import { Archive, ArrowLeft } from 'lucide-react-native';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
@@ -60,6 +60,67 @@ export function PointsItens(){
         }
     }
 
+    async function confirmDelete(id: any){
+            Alert.alert(
+            'Aviso!',
+            'Você deseja deletar esse apontamento?',
+            [
+                {
+                text: 'Cancelar',
+                onPress: () => console.log('Cancel Pressed'),
+                style: 'cancel',
+                },
+                {text: 'OK', onPress: () => handleDelete(id)},
+            ],
+            {cancelable: false},
+            );
+        }
+    
+        async function handleDelete(id: number) {
+            try {
+                console.log('Deletando item do inventario id: ', id);
+                
+                await api.delete(`/inventario-item/${id}`, {
+                    headers: { Authorization: `Bearer ${user.accessToken}` }
+                });
+    
+                setPointsItem(prev =>
+                    prev.filter(point => point.id !== id)
+                );
+    
+                toast.show({
+                    placement: "top",
+                    render: ({ id: toastId }) => (
+                        <ToastMessage
+                        id={toastId}
+                        title="Apontamento deletado"
+                        description="O apontamento foi removido com sucesso."
+                        action="success"
+                        onClose={() => toast.close(toastId)}
+                        />
+                    )
+                });
+    
+            } catch (e) {
+                console.log('Erro ao deletar: ', e);
+    
+                if (axios.isAxiosError(e)) {
+                return toast.show({
+                    placement: "top",
+                    render: ({ id: toastId }) => (
+                    <ToastMessage
+                        id={toastId}
+                        title="Erro ao deletar"
+                        description={e.response?.data?.errors?.[0] || 'Não foi possível excluir o apontamento.'}
+                        action="error"
+                        onClose={() => toast.close(toastId)}
+                    />
+                    )
+                });
+                }
+            }
+        }
+
     const isArrayExactlyNull = (arr: any[]) => {
       return Array.isArray(arr) && arr.length === 1 && arr[0] === null;
     };
@@ -94,7 +155,7 @@ export function PointsItens(){
                             data={pointsItem} 
                             keyExtractor={ item => item?.id.toString()}
                             renderItem={({ item }) => (
-                                <PointCard data={item} onPress={() => {}}/>
+                                <PointCard data={item} onPress={() => {}} onDelete={() => confirmDelete(item.id)}/>
                             )}
                             showsVerticalScrollIndicator={false}
                             contentContainerStyle={{ paddingBottom: 20}}

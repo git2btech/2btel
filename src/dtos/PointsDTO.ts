@@ -9,7 +9,9 @@ export type PointsItensDTO = {
     produtoId: number,
     quantidade: number,
     serial: string,
-    tipoApontamento: number
+    tipoApontamento: number,
+    modeloMaquina: string,
+    nomeDeposito: string
 }
 
 export type PointsDTO = {

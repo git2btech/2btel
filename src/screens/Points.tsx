@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList } from 'react-native';
+import { FlatList, Alert } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { VStack, Text, HStack, Heading, useToast } from '@gluestack-ui/themed';
 import { HomeHeader } from '@components/HomeHeader';
@@ -160,6 +160,67 @@ export function Points(){
         setSelectedSubGroupValue(value);
     }
 
+    async function confirmDelete(id: any){
+        Alert.alert(
+        'Aviso!',
+        'Você deseja deletar esse apontamento?',
+        [
+            {
+            text: 'Cancelar',
+            onPress: () => console.log('Cancel Pressed'),
+            style: 'cancel',
+            },
+            {text: 'OK', onPress: () => handleDelete(id)},
+        ],
+        {cancelable: false},
+        );
+    }
+
+    async function handleDelete(id: number) {
+        try {
+            console.log('Deletando id: ', id);
+            
+            await api.delete(`/inventario/${id}`, {
+                headers: { Authorization: `Bearer ${user.accessToken}` }
+            });
+
+            setPoints(prev =>
+                prev.filter(point => point.id !== id)
+            );
+
+            toast.show({
+                placement: "top",
+                render: ({ id: toastId }) => (
+                    <ToastMessage
+                    id={toastId}
+                    title="Apontamento deletado"
+                    description="O apontamento foi removido com sucesso."
+                    action="success"
+                    onClose={() => toast.close(toastId)}
+                    />
+                )
+            });
+
+        } catch (e) {
+            console.log('Erro ao deletar: ', e);
+
+            if (axios.isAxiosError(e)) {
+            return toast.show({
+                placement: "top",
+                render: ({ id: toastId }) => (
+                <ToastMessage
+                    id={toastId}
+                    title="Erro ao deletar"
+                    description={e.response?.data?.errors?.[0] || 'Não foi possível excluir o apontamento.'}
+                    action="error"
+                    onClose={() => toast.close(toastId)}
+                />
+                )
+            });
+            }
+        }
+    }
+
     useEffect(() => {
         if(user && user.hasSetGroup){
             getUserPoints();
@@ -218,7 +279,7 @@ export function Points(){
                         data={points} 
                         keyExtractor={ item => item.id.toString()}
                         renderItem={({ item }) => (
-                            <PointCard data={item} onPress={() => handleOpenExcerciseDetails(item.id)}/>
+                            <PointCard data={item} onPress={() => handleOpenExcerciseDetails(item.id)} onDelete={() => confirmDelete(item.id)}/>
                         )}
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={{ paddingBottom: 10}}

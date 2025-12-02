@@ -21,8 +21,8 @@ import 'moment/locale/pt-br';
 type FormDataProps = {
     tipoApontamento: string;
     dataMatricula: string;
-    matricula: string;
-    codigo: string
+    matricula?: string | null;
+    codigo?: string | null;
 };
 
 const defaultPoint = [
@@ -36,7 +36,8 @@ const defaultPoint = [
 const pointUpSchema = yup.object({
     tipoApontamento: yup.string().required("Informe o tipo do apontamento"),
     dataMatricula: yup.string().required("Informe a data da matriculas"),
-    matricula: yup.string().required("Informe a matricula"),
+    matricula: yup.string().nullable().notRequired(),
+    codigo: yup.string().nullable().notRequired(),
 });
 
 function getCurrentDateFormatted() {
@@ -77,7 +78,7 @@ export function CreatePoint(){
     });
     const [depositoProps, setDepositoProps] = useState({
         depositoId: '',
-        codigoDeposito: '',
+        codigo: '',
         nomeDeposito: '' 
     });
 
@@ -97,7 +98,7 @@ export function CreatePoint(){
 
         setDepositoProps({
             depositoId: '',
-            codigoDeposito: '',
+            codigo: '',
             nomeDeposito: '' 
         });
 
@@ -138,6 +139,7 @@ export function CreatePoint(){
             if(axios.isAxiosError(e)){
                 return toast.show({
                     placement: "top",
+                    duration: 1000,
                     render: ({ id }) => (
                         <ToastMessage id={id} title="Erro ao buscar matrícula" description={e.response?.data?.errors[0]} action="error" onClose={()=>toast.close(id)} />
                     )
@@ -166,6 +168,7 @@ export function CreatePoint(){
             if(axios.isAxiosError(e)){
                 return toast.show({
                     placement: "top",
+                    duration: 1000,
                     render: ({ id }) => (
                         <ToastMessage id={id} title="Erro ao buscar matrícula" description={e.response?.data?.errors[0]} action="error" onClose={()=>toast.close(id)} />
                     )
@@ -221,7 +224,7 @@ export function CreatePoint(){
             resetForm();
             return toast.show({
                 placement: "top",
-                duration: 2000,
+                duration: 1000,
                 render: ({ id }) => (
                     <ToastMessage id={id} title="Sucesso" description="Apontamento criado com sucesso!" action="success" onClose={()=>navigation.navigate("points")} />
                 ),
@@ -231,11 +234,13 @@ export function CreatePoint(){
             })
         } catch(e){
             console.log(e)
+            console.log(e.response);
+            console.log(e.response?.data?.errors);
             setLoad(false);
             if(axios.isAxiosError(e)){
                 return toast.show({
                     placement: "top",
-                    duration: 2000,
+                    duration: 1000,
                     render: ({ id }) => (
                         <ToastMessage id={id} title="Erro ao realizar o apontamento" description={e.response?.data?.errors[0]} action="error" onClose={()=>toast.close(id)} />
                     )
@@ -266,7 +271,7 @@ export function CreatePoint(){
                             control={control} 
                             name="tipoApontamento"
                             render={({ field: { onChange, value }}) => (
-                                <Select defaultValue="" onValueChange={onChange} data={defaultPoint}/>
+                                <Select key={dropdownKey} defaultValue="" onValueChange={onChange} data={defaultPoint}/>
                             )}
                         />
                         <Controller 
@@ -277,7 +282,7 @@ export function CreatePoint(){
                             )}
                         />
                         
-                        {tipoSelecionado == "1" || tipoSelecionado == "2" ? (
+                        {tipoSelecionado == "1" &&
                             <Center mb="$4">
                                 <Controller 
                                     control={control} 
@@ -312,15 +317,54 @@ export function CreatePoint(){
                                     )}
                                 />
                             </Center>
-                        ): (
+                        }
+
+                        {tipoSelecionado == "2" &&
+                            <Center mb="$4">
+                                <Controller 
+                                    control={control} 
+                                    name="codigo"
+                                    render={({ field: { onChange, value }}) => (
+                                        <AutocompleteDropdown
+                                            key={dropdownKey}
+                                            clearOnFocus={false}
+                                            closeOnBlur={true}
+                                            closeOnSubmit={false}
+                                            onChangeText={handleCompleteByType}
+                                            onSelectItem={(item) => handleMatriculaSelect(item, onChange)}
+                                            textInputProps={{
+                                                placeholder: "Digite o Código",
+                                                autoCorrect: false,
+                                                autoCapitalize: "none",
+                                                style: {
+                                                    backgroundColor: '#fff',
+                                                    paddingLeft: 18,
+                                                    width: Dimensions.get('window').height * 0.35,
+                                                    height: 50,
+                                                },
+                                            }}
+                                            rightButtonsContainerStyle={{
+                                                right: 0,
+                                                height: 30,
+                                                width: 50,
+                                                alignSelf: 'center',
+                                            }}
+                                            dataSet={dataComplete}
+                                        />
+                                    )}
+                                />
+                            </Center>
+                        }
+
+                        {["3", "4", "10"].includes(String(tipoSelecionado)) &&
                             <Controller 
                                 control={control} 
                                 name="codigo"
                                 render={({ field: { onChange, value }}) => (
-                                    <Input placeholder="Código:" value={value} autoCapitalize="none" onChangeText={onChange} errorMessage={errors.matricula?.message}/>
+                                    <Input placeholder="Código:" value={value} autoCapitalize="none" onChangeText={onChange} errorMessage={errors.codigo?.message}/>
                                 )}
                             />
-                        )}
+                        }
 
                         <Button title="Criar Apontamento" mb="$3" variant="solid" onPress={handleSubmit(handlePoint)} />
                         <Button title="Voltar" variant="solid" onPress={() => handleBackToPointList()} />
