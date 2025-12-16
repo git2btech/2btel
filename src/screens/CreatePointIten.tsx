@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Dimensions, StyleSheet } from 'react-native';
+import { Dimensions, StyleSheet, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions, BarcodeScanningResult} from 'expo-camera';
 import axios from 'axios';
@@ -265,38 +265,48 @@ export function CreatePointIten(){
 
     if (cameraVisible) {
         return (
-            <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
-            <CameraView
-                style={StyleSheet.absoluteFillObject}
-                // barcodeScannerSettings={{
-                //     barcodeTypes: ['ean13', 'ean8'],
-                // }}
-                onBarcodeScanned={isScanning ? handleBarcodeScanned : undefined}
-            />
-
-            <VStack
-                position="absolute"
-                left={0}
-                right={0}
-                bottom={0}
-                p="$4"
-                bg="rgba(0,0,0,0.6)"
-                space="md"
+            <Modal
+                visible={cameraVisible}
+                animationType="fade"
+                transparent={false}
+                onRequestClose={() => {
+                    setCameraVisible(false);
+                    setIsScanning(false);
+                }}
             >
-                <Text color="$white" textAlign="center">
-                Aponte a câmera para o código de barras EAN
-                </Text>
+                <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
+                    <CameraView
+                        style={StyleSheet.absoluteFillObject}
+                        // barcodeScannerSettings={{
+                        //     barcodeTypes: ['ean13', 'ean8'],
+                        // }}
+                        onBarcodeScanned={isScanning ? handleBarcodeScanned : undefined}
+                    />
 
-                <Button
-                    bg="$red500"
-                    title="Cancelar"
-                    onPress={() => {
-                        setCameraVisible(false);
-                        setIsScanning(false);
-                    }}
-                />
-            </VStack>
-            </SafeAreaView>
+                    <VStack
+                        position="absolute"
+                        left={0}
+                        right={0}
+                        bottom={0}
+                        p="$4"
+                        bg="rgba(0,0,0,0.6)"
+                        space="md"
+                    >
+                        <Text color="$white" textAlign="center">
+                        Aponte a câmera para o código de barras EAN
+                        </Text>
+
+                        <Button
+                            bg="$red500"
+                            title="Cancelar"
+                            onPress={() => {
+                                setCameraVisible(false);
+                                setIsScanning(false);
+                            }}
+                        />
+                    </VStack>
+                </SafeAreaView>
+            </Modal>
         );
     }
 

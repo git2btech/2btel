@@ -126,7 +126,7 @@ export function CreatePoint(){
             if(text.length >= 3){
                 setLoading(true);
                 api.defaults.headers.Authorization = `Bearer ${user.accessToken}`;
-                const response = await api.get('/maquina?search='+text.toUpperCase());
+                const response = await api.get(`/maquina?search=${text.toUpperCase()}`);
                 setDataMatriculas(response.data.list);
                 for (let i = 0; i < response.data.list.length; i++ ){
                     matriculas_lista.push({id: response.data.list[i].id, title: response.data.list[i].matricula +" - "+response.data.list[i].modelo});
@@ -135,6 +135,7 @@ export function CreatePoint(){
                 setLoading(false);
             }
     } catch(e){
+            console.log('Dados: ', e);
             setLoad(false);
             if(axios.isAxiosError(e)){
                 return toast.show({
@@ -152,9 +153,10 @@ export function CreatePoint(){
         try{
             let deposito_lista = [];
             if(text.length >= 3){
+                console.log('Dados: ', text);
                 setLoading(true);
                 api.defaults.headers.Authorization = `Bearer ${user.accessToken}`;
-                const response = await api.get('/deposito?search='+text.toUpperCase());
+                const response = await api.get(`/deposito?search=${text.toUpperCase()}`);
                 console.log('Dados: ', response.data);
                 setDataDepositos(response.data.list);
                 for (let i = 0; i < response.data.list.length; i++ ){
@@ -164,6 +166,7 @@ export function CreatePoint(){
                 setLoading(false);
             }
     } catch(e){
+            console.log('Dados: ', e);
             setLoad(false);
             if(axios.isAxiosError(e)){
                 return toast.show({
