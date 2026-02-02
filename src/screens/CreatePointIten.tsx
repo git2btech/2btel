@@ -29,6 +29,7 @@ type FormDataProps = {
     codigo: string;
     quantidade: string;
     chave?: string | null;
+    codigoProduto?: string;
 };
 
 const defaultPoint = [
@@ -42,7 +43,13 @@ const defaultPoint = [
 const pointUpSchema = yup.object({
     codigo: yup.string().required("Informe o codigo do apontamento"),
     quantidade: yup.string().required("Informe a quantidade dos itens"),
-    chave: yup.string().nullable().notRequired(),
+    codigoProduto: yup.string().nullable(),
+    chave: yup.string().when("codigoProduto", {
+        is: (value: string | undefined) => value?.includes("OC"),
+        then: (schema) =>
+        schema.required("A chave é obrigatória para produtos com OC"),
+        otherwise: (schema) => schema.nullable().notRequired(),
+    }),
 });
 
 export function CreatePointIten(){
@@ -69,6 +76,7 @@ export function CreatePointIten(){
     const [permission, requestPermission] = useCameraPermissions();
     const [dataEan, setDataEan] = useState({});
     const [eanEnabled, setEanEnabled] = useState(false);
+    const [isExpired, setIsExpired] = useState(false);
     function handleBackToPointList(){
         navigation.navigate("pointsItens", {pointID: point.id})
     }
@@ -104,11 +112,11 @@ export function CreatePointIten(){
             const response = await api.get('/produto?search='+text.toUpperCase());
             setDataProdutos(response.data.list);
             for (let i = 0; i < response.data.list.length; i++ ){
-                if(response.data.list[i].DescricaoSubCategoria !== "FAMILIA"){
-                matriculas_lista.push({
-                    id: response.data.list[i].id, 
-                    title: response.data.list[i].codigo+" - "+response.data.list[i].descricao,
-                });
+                if(response.data.list[i].descricaoSubCategoria !== "FAMILIA"){
+                    matriculas_lista.push({
+                        id: response.data.list[i].id, 
+                        title: response.data.list[i].codigo+" - "+response.data.list[i].descricao,
+                    });
                 }
             }
             setDataProduto(matriculas_lista);
@@ -123,6 +131,18 @@ export function CreatePointIten(){
                 setLoading(true);
                 api.defaults.headers.Authorization = `Bearer ${user.accessToken}`;
                 const response = await api.get('/produto?search='+text.toUpperCase());
+
+                if(response.data.list.length == 0){
+                    setLoading(false);
+                    return toast.show({ 
+                        placement: "top",
+                        duration: 2000,
+                        render: ({ id }) => (
+                            <ToastMessage id={id} title="Produto não encontrado" description="Produto não encontrado no sistema." action="error" onClose={()=>toast.close(id)} />
+                        )
+                    })
+                }
+
                 for (let i = 0; i < response.data.list.length; i++ ){
                     setDataEan({
                         id: response.data.list[i].id, 
@@ -155,6 +175,8 @@ export function CreatePointIten(){
     }
 
     async function handlePointIten({ quantidade, chave}: FormDataProps){
+        console.log('chave', chave);
+        console.log('produtoProps', produtoProps);
         try{
             setLoading(true);
             const response = await api.post(`/inventario/${point.id}}/item`, {
@@ -200,6 +222,22 @@ export function CreatePointIten(){
             produtoId: item.id,
             NomeProduto: produtoFiltered[0].descricao
         })
+        setValue("codigoProduto", produtoFiltered[0].codigo, {
+            shouldValidate: true,
+        });
+        if (item) {
+            onChange(item.title);
+        } else {
+            onChange("");
+        }
+    }
+
+    function setChaveField(item: { id: string; title: string } | null, onChange: (value: string) => void) {
+        if(!item) return;
+        const produtoFiltered = dataProdutos.filter(function (el: any) {
+            return el.id == item.id;
+        });
+        setValue('chave', produtoFiltered[0].codigo);
         if (item) {
             onChange(item.title);
         } else {
@@ -245,6 +283,21 @@ export function CreatePointIten(){
         }
     }
 
+    useEffect(() => {
+        console.log('point', point);
+        if (!point?.dataApontamento) return;
+
+        const dataApontamento = new Date(point.dataApontamento);
+        const agora = new Date();
+
+        const diffEmMs = agora.getTime() - dataApontamento.getTime();
+        const diffEmDias = diffEmMs / (1000 * 60 * 60 * 24);
+        console.log('diffEmDias', diffEmDias);
+        if (diffEmDias >= 5) {
+            setIsExpired(true);
+        }
+    }, [point.dataApontamento]);
+
 
     useEffect(()=>{
         switch(point.tipoApontamento){
@@ -258,10 +311,11 @@ export function CreatePointIten(){
     },[point.tipoApontamento])
     
     useEffect(()=>{
-    if(produtoProps.NomeProduto.includes("OC")){
-        setHasOcOption(true);
-    }
-    },[produtoProps.NomeProduto])
+        console.log('produtoProps.NomeProduto', produtoProps);
+        if(produtoProps.codigoProduto.includes("OC")){
+            setHasOcOption(true);
+        }
+    },[produtoProps.codigoProduto])
 
     if (cameraVisible) {
         return (
@@ -310,22 +364,44 @@ export function CreatePointIten(){
         );
     }
 
+    if (isExpired) {
+        return (
+            <VStack flex={1}>
+                <HomeHeader />
+
+                <Center flex={1} px="$8" gap="$4">
+                    <Heading color="white" fontSize="$md" textAlign="center">
+                        Data limite do apontamento ultrapassada
+                    </Heading>
+
+                    <Text color="$gray800" fontSize="$sm" textAlign="center">
+                        Este apontamento ultrapassou o prazo de 5 dias e não pode mais receber novos itens.
+                    </Text>
+
+                    <Button
+                    title="Voltar"
+                    variant="solid"
+                    onPress={handleBackToPointList}
+                    />
+                </Center>
+            </VStack>
+        );
+    }
+
+
     return (
         <VStack flex={1}>
             <HomeHeader />
             <VStack pt="$10" px="$8" flex={1}>
-                <HStack justifyContent="space-between" mb="$5" alignItems="center">
-                    <Heading color="white" fontSize="$md" fontFamily="$heading">Adicionar Itens ao Apontamento</Heading>
-                </HStack>
-                    <Center gap="$2">
-                        <Center mb="$4">
-                           {eanEnabled ? (
-                                <Text color="white">Produto: {dataEan?.title}</Text>
-                            ): (
-                                <Controller 
-                                    control={control} 
-                                    name="codigo"
-                                    render={({ field: { onChange, value }}) => (
+                        {eanEnabled ? (
+                            <Text color="white">Produto: {dataEan?.title}</Text>
+                        ): (
+                            <Controller 
+                                control={control} 
+                                name="codigo"
+                                render={({ field: { onChange, value }}) => (
+                                    <>
+                                        <Text mb="$3" fontWeight="bold" color="white" textAlign='left'>Digite aqui o código do produto ou ocorrência:</Text>
                                         <AutocompleteDropdown
                                             key={dropdownKey}
                                             clearOnFocus={false}
@@ -334,7 +410,7 @@ export function CreatePointIten(){
                                             onChangeText={getProduto}
                                             onSelectItem={(item) => handleProductSelect(item, onChange)}
                                             textInputProps={{
-                                                placeholder: "Digite o código do produto",
+                                                placeholder: "Código do produto ou Ocorrência:",
                                                 autoCorrect: false,
                                                 autoCapitalize: "none",
                                                 style: {
@@ -352,28 +428,78 @@ export function CreatePointIten(){
                                             }}
                                             dataSet={dataProduto}
                                         />
-                                    )}
-                                />
-                            )}
-                        </Center>
-                        <Controller 
-                            control={control} 
-                            name="quantidade"
-                            render={({ field: { onChange, value }}) => (
+                                    </>
+                                )}
+                            />
+                        )}
+                    <Controller 
+                        control={control} 
+                        name="quantidade"
+                        render={({ field: { onChange, value }}) => (
+                            <>
+                                <Text mt="$3" mb="$3" fontWeight="bold" color="white" textAlign='left'>Digite aqui a quantidade do item:</Text>
                                 <Input placeholder="Quantidade" value={value} autoCapitalize="none" onChangeText={onChange} errorMessage={errors.quantidade?.message}/>
-                            )}
-                        />
+                            </>
+                        )}
+                    />
+                    {!hasOcOption ? (
                         <Controller 
                             control={control} 
                             name="chave"
                             render={({ field: { onChange, value }}) => (
-                                <Input placeholder="Chave" value={value} autoCapitalize="none" onChangeText={onChange} errorMessage={errors.chave?.message}/>
+                                <>
+                                    <Text mb="$3" fontWeight="bold" color="white" textAlign='left'>Digite aqui o código chave se existir:</Text>
+                                    <Input placeholder="Chave" value={value} autoCapitalize="none" onChangeText={onChange} errorMessage={errors.chave?.message}/>
+                                </>
                             )}
                         />
-                        <Button title={loading ? "Aguarde..." : "Ler EAN"} mb="$3" variant="solid" onPress={() => openScanner()} disabled={loading} />
-                        <Button title={loading ? "Aguarde..." : "Adicionar Item"} mb="$3" variant="solid" onPress={handleSubmit(handlePointIten)} disabled={loading} />
-                        <Button title="Voltar" variant="solid" onPress={() => handleBackToPointList()}/>
-                    </Center>
+                    ) : (
+                        <>
+                            <Controller 
+                                control={control} 
+                                name="chave"
+                                render={({ field: { onChange, value }}) => (
+                                    <>
+                                        <Text fontWeight="bold" color="white" textAlign='left'>Digite aqui o produto ligado a ocorrência:</Text>
+                                        <AutocompleteDropdown
+                                            key={dropdownKey}
+                                            clearOnFocus={false}
+                                            closeOnBlur={true}
+                                            closeOnSubmit={false}
+                                            onChangeText={getProduto}
+                                            onSelectItem={(item) => setChaveField(item, onChange)}
+                                            textInputProps={{
+                                                placeholder: "Digite o código chave",
+                                                autoCorrect: false,
+                                                autoCapitalize: "none",
+                                                style: {
+                                                    backgroundColor: '#fff',
+                                                    paddingLeft: 18,
+                                                    width: Dimensions.get('window').height * 0.33,
+                                                    height: 50,
+                                                },
+                                            }}
+                                            rightButtonsContainerStyle={{
+                                                right: 0,
+                                                height: 30,
+                                                width: 50,
+                                                alignSelf: 'center',
+                                            }}
+                                            dataSet={dataProduto}
+                                        />
+                                    </>
+                                )}
+                            />
+                            {errors?.chave?.message && (
+                                <Text style={{ color: 'red' }}>
+                                    {errors.chave.message}
+                                </Text>
+                            )}
+                        </>
+                    )}
+                    <Button mt="$4" title={loading ? "Aguarde..." : "Ler EAN"} mb="$3" variant="solid" onPress={() => openScanner()} disabled={loading} />
+                    <Button title={loading ? "Aguarde..." : "Adicionar Item"} mb="$3" variant="solid" onPress={handleSubmit(handlePointIten)} disabled={loading} />
+                    <Button title="Voltar" variant="solid" onPress={() => handleBackToPointList()}/>
             </VStack>
         </VStack>
     )

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Alert } from 'react-native';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation, useFocusEffect, useRoute, RouteProp } from '@react-navigation/native';
 import { VStack, Text, HStack, Heading, useToast } from '@gluestack-ui/themed';
 import { HomeHeader } from '@components/HomeHeader';
 import { Group } from '@components/Group';
@@ -47,7 +47,8 @@ export function Points(){
     const [groupSelected, setGroupSelected] = useState("Maquina");
     const [selectedGroupValue, setSelectedGroupValue] = useState<string | null>(null);
     const [selectedSubGroupValue, setSelectedSubGroupValue] = useState<string | null>(null);
-    
+    const route = useRoute<RouteProp<any>>();
+
     function handleOpenExcerciseDetails(pointID: number){
         navigation.navigate("pointsItens", {pointID});
     }
@@ -60,6 +61,7 @@ export function Points(){
     async function getUserGroups() {
         try{
             const response = await api.get(`/permissao-usuario/${user.id}`, { 'headers': { 'Authorization': `Bearer ${user.accessToken}` } });
+            console.log('Response grupos: ', response.data);
             if(response.data && response.data.grupos.length >= 1){
                 setGroups(response.data.grupos);
                 let dataGroups: DataSelect[] = [];
@@ -233,7 +235,7 @@ export function Points(){
         if(user && user.hasSetGroup){
             getUserPoints();
         }
-    }, [groupSelected]))
+    }, [route.params?.refresh, groupSelected]))
 
     return (
         <VStack flex={1}>

@@ -232,7 +232,7 @@ export function CreatePoint(){
                     <ToastMessage id={id} title="Sucesso" description="Apontamento criado com sucesso!" action="success" onClose={()=>navigation.navigate("points")} />
                 ),
                 onCloseComplete() {
-                    navigation.navigate("points")
+                    navigation.navigate("points", { refresh: true})
                 },
             })
         } catch(e){
@@ -305,7 +305,7 @@ export function CreatePoint(){
                                                 style: {
                                                     backgroundColor: '#fff',
                                                     paddingLeft: 18,
-                                                    width: Dimensions.get('window').height * 0.35,
+                                                    width: Dimensions.get('window').height * 0.33,
                                                     height: 50,
                                                 },
                                             }}
@@ -342,7 +342,7 @@ export function CreatePoint(){
                                                 style: {
                                                     backgroundColor: '#fff',
                                                     paddingLeft: 18,
-                                                    width: Dimensions.get('window').height * 0.35,
+                                                    width: Dimensions.get('window').height * 0.33,
                                                     height: 50,
                                                 },
                                             }}

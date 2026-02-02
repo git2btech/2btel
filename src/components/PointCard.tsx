@@ -31,6 +31,7 @@ export function PointCard({ data, onPress, onDelete, ...rest }: Props){
                     {'loginRegistro' in data && <Text fontSize="$xs" color="$gray300" numberOfLines={1}>Criado por: {data.loginRegistro}</Text>}
                     {'dataRegistro' in data && <Text fontSize="$xs" color="$gray300" numberOfLines={1}>Data do registro: {formatDate(data.dataRegistro)}</Text>}
                     {'nomeProduto' in data && <Text fontSize="$xs" color="$body">{data.nomeProduto}</Text>}
+                    {'codigoChave' in data && <Text fontSize="$xs" color="$body">{data.codigoChave}</Text>}
                     {'quantidade' in data && <Text fontSize="$xs" color="$gray300">Quantidade: {data.quantidade}</Text>}
                 </VStack>
                 <TouchableOpacity onPress={onDelete} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>

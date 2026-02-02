@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "2bapp",
-    "slug": "tobeapp",
-    "version": "1.0.0",
+    "slug": "tobetel",
+    "version": "1.0.7",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -13,6 +13,7 @@
       "backgroundColor": "#25c998"
     },
     "ios": {
+      "buildNumber": "5",
       "supportsTablet": true,
       "bundleIdentifier": "com.tobetech.tobeapp",
       "infoPlist": {
@@ -20,12 +21,15 @@
       }
     },
     "android": {
+      "versionCode": 4,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#25c998"
       },
       "package": "com.tobetech.tobeapp",
       "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
         "android.permission.CAMERA"
       ]
@@ -60,9 +64,15 @@
         "origin": false
       },
       "eas": {
-        "projectId": "c3c60b26-4616-462b-acc4-6b4282da119e"
+        "projectId": "08253984-5737-420d-ad65-f01ebb2adf3c"
       }
     },
-    "owner": "aikid"
+    "owner": "aikid",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/08253984-5737-420d-ad65-f01ebb2adf3c"
+    }
   }
 }
